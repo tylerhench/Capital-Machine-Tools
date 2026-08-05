@@ -243,7 +243,7 @@ h2.section-title.spaced { margin-top: 44px; }
 .footer h3 {
   margin: 0 0 16px;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 17px;
+  font-size: 24px;
   font-weight: bold;
   color: #ffffff;
 }
@@ -256,14 +256,14 @@ h2.section-title.spaced { margin-top: 44px; }
 }
 
 .footer-grid dt {
-  font-size: 12px;
+  font-size: 16px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #9fb2c2;
 }
 
 .footer-grid dd {
-  margin: 0 0 10px;
+  margin: 0 0 14px;
   color: #ffffff;
 }
 
