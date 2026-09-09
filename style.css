@@ -287,3 +287,28 @@ h2.section-title.spaced { margin-top: 44px; }
   .nav a { padding: 12px 16px; font-size: 12px; }
   .btn { width: 100%; text-align: center; }
 }
+
+/* ---- Font + footer update ---- */
+
+body, .logo, .estab, .nav a, h2.section-title,
+.capabilities li, .btn, .field label,
+.field input, .field textarea, .footer h3 {
+  font-family: "Nunito Sans", -apple-system, "Segoe UI", Arial, sans-serif;
+}
+
+.logo { font-weight: 800; letter-spacing: -0.015em; }
+h2.section-title { font-weight: 800; letter-spacing: -0.01em; }
+.footer h3 { font-weight: 800; letter-spacing: -0.01em; }
+
+.footer-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px 24px;
+}
+
+@media (max-width: 780px) {
+  .footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 460px) {
+  .footer-grid { grid-template-columns: 1fr; }
+}
