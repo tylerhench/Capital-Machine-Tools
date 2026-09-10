@@ -451,8 +451,8 @@ h2.section-title::after {
 /* ---- Header spacing ---- */
 
 .masthead {
-  padding-top: 22px;
-  padding-bottom: 22px;
+  padding-top: 14px;
+  padding-bottom: 14px;
 }
 
 .masthead-inner { align-items: center; }
