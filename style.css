@@ -408,14 +408,14 @@ h2.section-title::after {
 }
 
 .logo-lockup img {
-  width: 96px;
-  height: 96px;
+  width: 125px;
+  height: 125px;
   flex: none;
   display: block;
 }
 
 .logo-lockup span {
-  font-size: 44px;
+  font-size: 50px;
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1;
