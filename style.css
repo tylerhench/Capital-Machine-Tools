@@ -393,3 +393,57 @@ h2.section-title::after {
   .logo-lockup img { width: 48px; height: 48px; }
   .foot-lockup img { width: 40px; height: 40px; }
 }
+
+/* ---- Logo lockups ---- */
+
+.logo { margin: 0; }
+
+.logo-lockup {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  text-decoration: none;
+  color: inherit;
+  line-height: 1;
+}
+
+.logo-lockup img {
+  width: 96px;
+  height: 96px;
+  flex: none;
+  display: block;
+}
+
+.logo-lockup span {
+  font-size: 44px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: #1b3c5e;
+}
+
+.logo-lockup:hover span { color: #3d7099; }
+
+.foot-lockup {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+  text-decoration: none;
+}
+
+.foot-lockup img { width: 56px; height: 56px; flex: none; display: block; }
+.foot-lockup h3 { margin: 0; line-height: 1; }
+.foot-lockup:hover h3 { color: #8fb2ce; }
+
+.logo-lockup:focus-visible,
+.foot-lockup:focus-visible {
+  outline: 3px solid #3d7099;
+  outline-offset: 4px;
+}
+
+@media (max-width: 700px) {
+  .logo-lockup img { width: 64px; height: 64px; }
+  .logo-lockup span { font-size: 28px; }
+  .foot-lockup img { width: 44px; height: 44px; }
+}
