@@ -447,3 +447,21 @@ h2.section-title::after {
   .logo-lockup span { font-size: 28px; }
   .foot-lockup img { width: 44px; height: 44px; }
 }
+
+/* ---- Header spacing ---- */
+
+.masthead {
+  padding-top: 22px;
+  padding-bottom: 22px;
+}
+
+.masthead-inner { align-items: center; }
+
+.masthead p { margin: 0; }
+
+.logo-lockup { line-height: 1; }
+
+.logo-lockup img {
+  display: block;
+  vertical-align: middle;
+}
