@@ -359,3 +359,37 @@ h2.section-title::after {
 @media (max-width: 680px) {
   .capabilities { grid-template-columns: 1fr; }
 }
+
+/* ---- Logo lockups ---- */
+
+.logo-lockup {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.logo-lockup:hover span { color: #3d7099; }
+
+.foot-lockup {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 20px;
+  text-decoration: none;
+}
+
+.foot-lockup h3 { margin: 0; }
+.foot-lockup:hover h3 { color: #8fb2ce; }
+
+.logo-lockup:focus-visible,
+.foot-lockup:focus-visible {
+  outline: 3px solid #3d7099;
+  outline-offset: 4px;
+}
+
+@media (max-width: 560px) {
+  .logo-lockup img { width: 48px; height: 48px; }
+  .foot-lockup img { width: 40px; height: 40px; }
+}
