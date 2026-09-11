@@ -466,47 +466,14 @@ h2.section-title::after {
   vertical-align: middle;
 }
 
-/* ============================================================
-   Navy side panels + header gradient wash
-   Paste at the very BOTTOM of style.css
-   ============================================================ */
- 
-/* ---- Header: white at top, deepening into the nav ---- */
- 
 .masthead {
   background: linear-gradient(180deg,
     #ffffff 0%,
-    #ffffff 30%,
-    #b2c7d9 100%);
+    #ffffff 35%,
+    #d8e2ec 100%);
 }
- 
-/* Tagline sits on the darker end of the wash, so lift its contrast */
-.estab { color: #2c4a68; }
- 
-/* ---- Nav: darker than the gutters so the bar stays distinct ---- */
- 
-.nav { background: #12293f; }
- 
-.nav a:hover { background: #234b73; }
-.nav a.here  { background: #234b73; border-bottom-color: #3d7099; }
- 
-/* ---- Side panels ---- */
- 
-body { background: #1b3c5e; }
- 
-.sheet {
-  border: none;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12),
-              0 8px 24px rgba(0, 0, 0, 0.10);
+
+body {
+  background: linear-gradient(180deg, #dfe7ee 0%, #c8d6e3 100%);
+  background-attachment: fixed;
 }
- 
-/* Footer already sits on #12293f. Give it a divider so it does not
-   merge into the navy gutters above it. */
-.footer { border-top: 3px solid #3d7099; }
- 
-/* ---- Small screens: gutters vanish, so soften the contrast ---- */
- 
-@media (max-width: 700px) {
-  .sheet { box-shadow: none; }
-}
- 
