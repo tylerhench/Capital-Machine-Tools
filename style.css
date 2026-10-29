@@ -491,10 +491,33 @@ body {
 
 /* ---- Footer ---- */
 
+.foot-lockup {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 22px;
+  text-decoration: none;   /* no underline */
+}
+
 .foot-lockup .foot-badge {
   width: 56px;
   height: 56px;
   flex: none;
   display: block;
+}
+
+.foot-lockup h3 {
+  margin: 0;
+  line-height: 1;
+  color: #ffffff;
+  transition: color 0.15s ease;
+}
+
+.foot-lockup:hover h3 { color: #8fb2ce; }   /* turns blue on hover */
+
+.foot-lockup:focus-visible {
+  outline: 3px solid #8fb2ce;
+  outline-offset: 6px;
+  border-radius: 4px;
 }
 
