@@ -237,10 +237,10 @@ h2.section-title.spaced { margin-top: 44px; }
   background: var(--blue-dark);
   color: #dfe5ea;
   padding: 30px 0 34px;
-  font-size: 18px;
+  font-size: 14px;
 }
 
-.footer h1 {
+.footer h3 {
   margin: 0 0 16px;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 17px;
@@ -288,7 +288,11 @@ h2.section-title.spaced { margin-top: 44px; }
   .btn { width: 100%; text-align: center; }
 }
 
-/* ---- Font + footer update ---- */
+/* ============================================================
+   Accumulated updates
+   ============================================================ */
+
+/* ---- Nunito Sans throughout ---- */
 
 body, .logo, .estab, .nav a, h2.section-title,
 .capabilities li, .btn, .field label,
@@ -299,6 +303,8 @@ body, .logo, .estab, .nav a, h2.section-title,
 .logo { font-weight: 800; letter-spacing: -0.015em; }
 h2.section-title { font-weight: 800; letter-spacing: -0.01em; }
 .footer h3 { font-weight: 800; letter-spacing: -0.01em; }
+
+/* ---- Footer: four even columns ---- */
 
 .footer-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -313,7 +319,7 @@ h2.section-title { font-weight: 800; letter-spacing: -0.01em; }
   .footer-grid { grid-template-columns: 1fr; }
 }
 
-/* ---- Short underline on section headings ---- */
+/* ---- Short underline that matches each heading's width ---- */
 
 h2.section-title {
   border-bottom: none;
@@ -360,111 +366,17 @@ h2.section-title::after {
   .capabilities { grid-template-columns: 1fr; }
 }
 
-/* ---- Logo lockups ---- */
-
-.logo-lockup {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  text-decoration: none;
-  color: inherit;
-}
-
-.logo-lockup:hover span { color: #3d7099; }
-
-.foot-lockup {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  margin-bottom: 20px;
-  text-decoration: none;
-}
-
-.foot-lockup h3 { margin: 0; }
-.foot-lockup:hover h3 { color: #8fb2ce; }
-
-.logo-lockup:focus-visible,
-.foot-lockup:focus-visible {
-  outline: 3px solid #3d7099;
-  outline-offset: 4px;
-}
-
-@media (max-width: 560px) {
-  .logo-lockup img { width: 48px; height: 48px; }
-  .foot-lockup img { width: 40px; height: 40px; }
-}
-
-/* ---- Logo lockups ---- */
-
-.logo { margin: 0; }
-
-.logo-lockup {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  text-decoration: none;
-  color: inherit;
-  line-height: 1;
-}
-
-.logo-lockup img {
-  width: 150px;
-  height: 150px;
-  flex: none;
-  display: block;
-}
-
-.logo-lockup span {
-  font-size: 50px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1;
-  color: #1b3c5e;
-}
-
-.logo-lockup:hover span { color: #3d7099; }
-
-.foot-lockup {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 20px;
-  text-decoration: none;
-}
-
-.foot-lockup img { width: 56px; height: 56px; flex: none; display: block; }
-.foot-lockup h3 { margin: 0; line-height: 1; }
-.foot-lockup:hover h3 { color: #8fb2ce; }
-
-.logo-lockup:focus-visible,
-.foot-lockup:focus-visible {
-  outline: 3px solid #3d7099;
-  outline-offset: 4px;
-}
-
-@media (max-width: 700px) {
-  .logo-lockup img { width: 64px; height: 64px; }
-  .logo-lockup span { font-size: 28px; }
-  .foot-lockup img { width: 44px; height: 44px; }
-}
-
 /* ---- Header spacing ---- */
 
 .masthead {
-  padding-top: 14px;
-  padding-bottom: 14px;
+  padding-top: 22px;
+  padding-bottom: 22px;
 }
 
 .masthead-inner { align-items: center; }
-
 .masthead p { margin: 0; }
 
-.logo-lockup { line-height: 1; }
-
-.logo-lockup img {
-  display: block;
-  vertical-align: middle;
-}
+/* ---- Header gradient + side panels ---- */
 
 .masthead {
   background: linear-gradient(180deg,
@@ -473,7 +385,121 @@ h2.section-title::after {
     #d8e2ec 100%);
 }
 
+.nav { background: #12293f; }
+.nav a:hover { background: #234b73; }
+.nav a.here  { background: #234b73; border-bottom-color: #3d7099; }
+
 body {
   background: linear-gradient(180deg, #dfe7ee 0%, #c8d6e3 100%);
   background-attachment: fixed;
+}
+
+.sheet {
+  border: none;
+  box-shadow: 0 1px 3px rgba(27, 60, 94, 0.11),
+              0 8px 22px rgba(27, 60, 94, 0.09);
+}
+
+.footer { border-top: 3px solid #3d7099; }
+
+@media (max-width: 700px) {
+  .sheet { box-shadow: none; }
+}
+
+/* ============================================================
+   Header lockup — Bitter wordmark, gradient rule, tagline
+   ============================================================ */
+
+/* Pin everything to the left. Your original header used
+   space-between, which spreads the logo and text apart. */
+.masthead-inner {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+/* ---- One number sizes the whole lockup ----
+   Everything below is measured in em, relative to this font-size,
+   so the badge, name, rule and tagline always keep their proportions.
+   It scales with the window between the min and max values. */
+.logo-lockup {
+  font-size: clamp(20px, 5.2vw, 61px);
+  display: flex;
+  align-items: center;
+  gap: 0.52em;
+  text-decoration: none;
+  color: inherit;
+}
+
+.logo-lockup .logo-badge {
+  width: 2.46em;
+  height: 2.46em;
+  flex: none;
+  display: block;
+}
+
+.logo-lockup .logo-text {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.logo-lockup .logo-name {
+  position: relative;
+  z-index: 2;              /* keeps the letters in front of the rule */
+  font-family: "Bitter", Georgia, serif;
+  font-weight: 700;
+  font-size: 1em;
+  line-height: 1;
+  letter-spacing: -0.015em;
+  color: #1b3c5e;
+}
+
+/* Light blue to navy, sitting just under the letters.
+   The tail of the p passes in front of it. */
+.logo-lockup .logo-rule {
+  position: relative;
+  z-index: 1;
+  display: block;
+  height: 0.08em;
+  min-height: 2px;
+  margin-top: -0.115em;    /* the small gap — closer to 0 opens it up */
+  border-radius: 3px;
+  background: linear-gradient(90deg, #8fb2ce 0%, #1b3c5e 100%);
+}
+
+.logo-lockup .logo-tagline {
+  font-family: "Nunito Sans", -apple-system, "Segoe UI", Arial, sans-serif;
+  font-weight: 700;
+  font-size: max(0.39em, 11px);
+  line-height: 1;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #3d7099;
+  margin-top: 0.85em;
+  padding-left: 0.15em;    /* the optical nudge that lines up C and B */
+}
+
+.logo-lockup:hover .logo-name { color: #3d7099; }
+.logo-lockup:hover .logo-tagline { color: #3d7099; }
+
+.logo-lockup:focus-visible {
+  outline: 3px solid #3d7099;
+  outline-offset: 6px;
+  border-radius: 4px;
+}
+
+/* ---- Footer ---- */
+
+.foot-lockup .foot-badge {
+  width: 56px;
+  height: 56px;
+  flex: none;
+  display: block;
+}
+
+.footer .foot-lockup h3 {
+  font-family: "Bitter", Georgia, serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
