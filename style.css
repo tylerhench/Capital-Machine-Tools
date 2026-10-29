@@ -521,3 +521,41 @@ body {
   border-radius: 4px;
 }
 
+
+/* ============================================================
+   Footer sizing — larger text and badge
+   ============================================================ */
+
+.foot-lockup .foot-badge {
+  width: 72px;
+  height: 72px;
+}
+
+.footer .foot-lockup h3 { font-size: 23px; }
+
+.footer-grid dt { font-size: 13.5px; }
+.footer-grid dd { font-size: 17.5px; }
+
+.footer .copyright { font-size: 14.5px; }
+
+/* Columns size to their content with equal space between them,
+   so the email address has room at the larger size. */
+.footer-grid {
+  grid-template-columns: repeat(4, auto);
+  justify-content: space-between;
+  column-gap: 32px;
+}
+
+@media (max-width: 860px) {
+  .footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: stretch;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-grid { grid-template-columns: 1fr; }
+  .foot-lockup .foot-badge { width: 60px; height: 60px; }
+  .footer .foot-lockup h3 { font-size: 20px; }
+  .footer-grid dd { font-size: 16.5px; }
+}
