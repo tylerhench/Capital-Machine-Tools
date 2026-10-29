@@ -423,17 +423,17 @@ body {
    so the badge, name, rule and tagline always keep their proportions.
    It scales with the window between the min and max values. */
 .logo-lockup {
-  font-size: clamp(20px, 5.2vw, 61px);
+  font-size: clamp(20px, 6.5vw, 61px);
   display: flex;
   align-items: center;
-  gap: 0.52em;
+  gap: 0.43em;
   text-decoration: none;
   color: inherit;
 }
 
 .logo-lockup .logo-badge {
-  width: 2.46em;
-  height: 2.46em;
+  width: 2.63em;           /* PNG includes a little transparent padding */
+  height: 2.63em;
   flex: none;
   display: block;
 }
@@ -471,13 +471,16 @@ body {
 .logo-lockup .logo-tagline {
   font-family: "Nunito Sans", -apple-system, "Segoe UI", Arial, sans-serif;
   font-weight: 700;
-  font-size: max(0.39em, 11px);
+  font-size: 0.44em;
   line-height: 1;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.25em;  /* fallback only; logo-fit.js sets the exact value */
   text-transform: uppercase;
   color: #3d7099;
   margin-top: 0.85em;
   padding-left: 0.15em;    /* the optical nudge that lines up C and B */
+  white-space: nowrap;
+  width: 0;                /* the tagline never sets the width — */
+  min-width: 100%;         /* the name does, so the rule ends at "Tools" */
 }
 
 .logo-lockup:hover .logo-name { color: #3d7099; }
@@ -494,14 +497,14 @@ body {
 .foot-lockup {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 13px;
   margin-bottom: 22px;
   text-decoration: none;   /* no underline */
 }
 
 .foot-lockup .foot-badge {
-  width: 56px;
-  height: 56px;
+  width: 77px;
+  height: 77px;
   flex: none;
   display: block;
 }
@@ -511,6 +514,12 @@ body {
   line-height: 1;
   color: #ffffff;
   transition: color 0.15s ease;
+}
+
+.footer .foot-lockup h3 {
+  font-family: "Bitter", Georgia, serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .foot-lockup:hover h3 { color: #8fb2ce; }   /* turns blue on hover */
@@ -527,8 +536,8 @@ body {
    ============================================================ */
 
 .foot-lockup .foot-badge {
-  width: 72px;
-  height: 72px;
+  width: 77px;
+  height: 77px;
 }
 
 .footer .foot-lockup h3 { font-size: 23px; }
@@ -555,7 +564,42 @@ body {
 
 @media (max-width: 480px) {
   .footer-grid { grid-template-columns: 1fr; }
-  .foot-lockup .foot-badge { width: 60px; height: 60px; }
+  .foot-lockup .foot-badge { width: 64px; height: 64px; }
   .footer .foot-lockup h3 { font-size: 20px; }
   .footer-grid dd { font-size: 16.5px; }
+}
+
+/* ============================================================
+   Phones — M1 layout
+   ============================================================ */
+
+@media (max-width: 600px) {
+  .masthead { padding-top: 18px; padding-bottom: 18px; }
+
+  /* nav on one row, three tabs sharing the width */
+  .nav .wrap { padding: 0; }
+  .nav ul { flex-wrap: nowrap; }
+  .nav li { flex: 1 1 auto; }
+  .nav a {
+    padding: 15px 6px;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .nav li:last-child a { border-right: none; }
+
+  /* content runs edge to edge — no grey margins */
+  main.wrap { padding: 0; }
+  .sheet {
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 26px 20px 32px;
+  }
+}
+
+@media (max-width: 340px) {
+  .nav a { padding: 14px 4px; font-size: 10px; }
 }
