@@ -3,7 +3,8 @@
 A plain HTML site hosted on Cloudflare Pages, with an Inventory page that Dave
 updates from `/admin` without touching any code.
 
-- **Buyers** see the machines at `capitalmachinetools.com/inventory.html`.
+- **Buyers** see the machines at `capitalmachinetools.com/inventory`. Each machine also
+  has its own page, e.g. `capitalmachinetools.com/inventory/2008-haas-vf-2`, which Google can list.
 - **Dave** signs in at `capitalmachinetools.com/admin` with a code emailed to him,
   and can add, edit, hide, mark sold or delete machines. Changes show on the
   Inventory page right away.
@@ -19,6 +20,9 @@ updates from `/admin` without touching any code.
 | `admin/index.html` | Dave's page | Wording and layout yes. Keep every `id`, `name` and `data-page` the script uses |
 | `inventory.js` | Runs both inventory pages | Phone/email, categories and spec names at the top, yes. Leave the **Store** section alone |
 | `functions/` | The backend that saves machines and photos | Only if you mean to change how saving works |
+| `functions/inventory/[id].js`, `functions/_lib/page.js` | Builds each machine's own page (`/inventory/2008-haas-vf-2`) for Google and sharing | Its page layout mirrors `renderDetail()` in `inventory.js`; change both together |
+| `functions/sitemap.xml.js` | The sitemap Google reads; lists every machine on the website automatically | No need to edit |
+| `robots.txt` | Tells search engines to skip `/admin` and the backend | No need to edit |
 | `schema.sql` | Creates the database table (used once at setup) | No need to edit |
 | `logo-fit.js` | Fits the tagline under the logo | Leave alone |
 | `cmt-badge.png` | Logo in the header | Replace with a same-named file to change it |

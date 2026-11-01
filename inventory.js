@@ -14,6 +14,8 @@
   'use strict';
 
   var ADMIN = document.body.getAttribute('data-page') === 'admin';
+  /* A machine's own page (/inventory/<id>), built by functions/inventory/[id].js */
+  var MACHINE_PAGE = document.body.hasAttribute('data-machine-page');
 
   var PHONE = '203-767-6705';
   var TEL = '+12037676705';
@@ -336,6 +338,7 @@
     }
     function changed() {
       // picking a filter from a machine's page goes back to the list
+      if (MACHINE_PAGE) { location.href = '/inventory' + filterQuery(); return; }
       if (location.hash.length > 1) { location.hash = ''; return; }
       renderResults();
     }
@@ -371,6 +374,21 @@
         });
       });
     });
+  }
+
+  /* ?cat=Lathes&make=Haas — lets a filter picked elsewhere open the list already filtered */
+  function filterQuery() {
+    var q = new URLSearchParams();
+    selectedCats.forEach(function (c) { q.append('cat', c); });
+    selectedMakes.forEach(function (mk) { q.append('make', mk); });
+    var s = q.toString();
+    return s ? '?' + s : '';
+  }
+  function readFilterQuery() {
+    var q = new URLSearchParams(location.search);
+    selectedCats = q.getAll('cat');
+    selectedMakes = q.getAll('make');
+    if (q.get('q')) query = q.get('q');
   }
 
   function renderCounts(list) {
@@ -423,11 +441,15 @@
     });
   }
 
+  function machineLink(m) {
+    return (ADMIN ? '#' : '/inventory/') + encodeURIComponent(m.id);
+  }
+
   function cardHTML(m) {
     var img = m.photos[0] ? '<img src="' + esc(m.photos[0]) + '" alt="" loading="lazy">' : placeholder(m);
     var off = ADMIN && !isLive(m) ? ' off' : '';
     return '<li class="card' + off + '">' +
-      '<a class="card-link" href="#' + encodeURIComponent(m.id) + '">' +
+      '<a class="card-link" href="' + machineLink(m) + '">' +
         '<div class="photo">' + img + (m.video ? '<span class="vidbadge">&#9654; Video</span>' : '') + '</div>' +
         '<div class="card-body">' +
           '<p class="kicker">' + esc(kicker(m)) + '</p>' +
@@ -524,6 +546,7 @@
           '<div class="gallery"><div class="main">' + mainImg + '</div>' + thumbs + videoHTML(m) + '</div>' +
           '<div class="info">' +
             (ADMIN ? '<div class="adminrow">' + adminButtons(m) + '</div>' : '') +
+            (ADMIN && isLive(m) ? '<p class="publink"><a href="/inventory/' + encodeURIComponent(m.id) + '" target="_blank" rel="noopener">View on website &#8599;</a></p>' : '') +
             '<p class="kicker">' + esc(kicker(m)) + '</p>' +
             '<h1>' + esc(name(m)) + '</h1>' +
             '<div class="pricerow">' + priceHTML(m) + tagHTML(m) + '</div>' +
@@ -974,6 +997,28 @@
   }
 
   /* ---------- Start ---------- */
+
+  /* A machine's own page arrives already filled in; just add the photo
+     controls and the filter list. */
+  if (MACHINE_PAGE) {
+    var dataEl = document.getElementById('machine-data');
+    if (dataEl) {
+      try {
+        var current = JSON.parse(dataEl.textContent);
+        if (current.photos.length) setupGallery(current);
+      } catch (e) { /* the page still reads fine without the photo controls */ }
+    }
+    Store.all().then(function (list) { machines = list; renderFilters(); }, function () {});
+    return;
+  }
+
+  /* Old links like inventory.html#2008-haas-vf-2 go to the machine's own page */
+  if (!ADMIN && /^#[a-z0-9-]+$/.test(location.hash)) {
+    location.replace('/inventory/' + location.hash.slice(1));
+    return;
+  }
+  if (!ADMIN) readFilterQuery();
+
   app.innerHTML = '<p class="counts">Loading machines…</p>';
   Store.all().then(function (list) {
     machines = list;
