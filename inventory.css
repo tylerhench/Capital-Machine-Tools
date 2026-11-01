@@ -107,8 +107,8 @@
 .card-link:hover h3 { color: var(--steel); }
 .card-link:focus-visible { outline: 3px solid var(--steel); outline-offset: -3px; }
 
-.photo { aspect-ratio: 4 / 3; background: #e6ebef; border-bottom: 1px solid var(--card-rule); overflow: hidden; }
-.photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.photo { aspect-ratio: 4 / 3; background: #eef1f4; border-bottom: 1px solid var(--card-rule); overflow: hidden; }
+.photo img { display: block; width: 100%; height: 100%; object-fit: contain; }  /* whole photo, never cropped */
 
 .ph {
   width: 100%; height: 100%;
@@ -220,9 +220,9 @@
 .gallery .main {
   aspect-ratio: 4 / 3; overflow: hidden;
   border: 1px solid var(--card-rule); border-radius: 6px;
-  background: #e6ebef;
+  background: #eef1f4;
 }
-.gallery .main img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.gallery .main img { display: block; width: 100%; height: 100%; object-fit: contain; }
 
 .thumbs { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; }
 .thumbs button {
@@ -289,6 +289,7 @@ dialog::backdrop { background: rgba(8, 16, 26, 0.55); }
   font-size: 16px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--ink);
 }
 
+#photo-status { color: #8a5a00; font-weight: 700; }
 .help { margin: 5px 0 0; font-size: 13.5px; color: var(--ink-soft); }
 
 .seg { display: flex; flex-wrap: wrap; }

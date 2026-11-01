@@ -72,29 +72,52 @@
         : request('POST', '/api/admin/machines', data);
     },
     remove: function (id) { return request('DELETE', '/api/admin/machines/' + encodeURIComponent(id)); },
+    /* Resolves to { url, small } — small means the photo may look blurry on the site */
     uploadPhoto: function (file) {
-      return shrinkPhoto(file)
-        .then(function (blob) { return request('POST', '/api/admin/photos', blob, 'image/jpeg'); })
-        .then(function (data) { return data.url; });
+      return preparePhoto(file).then(function (p) {
+        return request('POST', '/api/admin/photos', p.blob, p.blob.type).then(function (data) {
+          return { url: data.url, small: Math.max(p.width, p.height) < SMALL_PHOTO };
+        });
+      });
     },
     /* For photos uploaded in the form but never saved; '/photos/x.jpg' → '/api/admin/photos/x.jpg' */
     discardPhoto: function (url) { return request('DELETE', '/api/admin' + url).catch(function () {}); }
   };
 
-  /* Shrinks a photo before upload. Phone photos are 3–5 MB; this makes
-     them about 200 KB with no visible loss on the site. */
-  function shrinkPhoto(file) {
+  var MAX_SIDE = 2400;              // longest side kept on the site, in pixels
+  var KEEP_AS_IS_BYTES = 4 * 1024 * 1024;
+  var SMALL_PHOTO = 1000;           // warn below this
+  var UPLOAD_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
+  /* Photos that are already a sensible size upload untouched, so they
+     are never re-compressed. Only big ones (phone photos are 3–5 MB)
+     are resized, with high-quality settings. */
+  function preparePhoto(file) {
     return new Promise(function (resolve, reject) {
       var img = new Image();
       var url = URL.createObjectURL(file);
       img.onload = function () {
-        var scale = Math.min(1, 1600 / Math.max(img.width, img.height));
+        var w = img.naturalWidth, h = img.naturalHeight;
+        var fits = Math.max(w, h) <= MAX_SIDE && file.size <= KEEP_AS_IS_BYTES;
+        if (fits && UPLOAD_TYPES.indexOf(file.type) !== -1) {
+          URL.revokeObjectURL(url);
+          resolve({ blob: file, width: w, height: h });
+          return;
+        }
+        var scale = Math.min(1, MAX_SIDE / Math.max(w, h));
         var c = document.createElement('canvas');
-        c.width = Math.round(img.width * scale);
-        c.height = Math.round(img.height * scale);
-        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        c.width = Math.round(w * scale);
+        c.height = Math.round(h * scale);
+        var ctx = c.getContext('2d');
+        ctx.fillStyle = '#ffffff';          // see-through areas become white, not black
+        ctx.fillRect(0, 0, c.width, c.height);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, c.width, c.height);
         URL.revokeObjectURL(url);
-        c.toBlob(function (blob) { blob ? resolve(blob) : reject(new Error('That photo couldn’t be read.')); }, 'image/jpeg', 0.8);
+        c.toBlob(function (blob) {
+          blob ? resolve({ blob: blob, width: w, height: h }) : reject(new Error('That photo couldn’t be read.'));
+        }, 'image/jpeg', 0.9);
       };
       img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('That file isn’t a photo we can read.')); };
       img.src = url;
@@ -619,22 +642,26 @@
       e.target.value = '';
       if (!files.length) return;
       var label = $('#photo-status');
-      var failed = 0;
+      var failed = 0, small = 0;
       uploading += files.length;
       syncSaveButton();
       label.textContent = 'Uploading ' + files.length + (files.length === 1 ? ' photo…' : ' photos…');
       // one at a time keeps the order Dave picked and is kinder to a phone connection
       files.reduce(function (chain, f) {
         return chain.then(function () {
-          return Store.uploadPhoto(f).then(function (url) {
-            if (!dlg.open) { Store.discardPhoto(url); return; }
-            draftPhotos.push(url);
-            newUploads.push(url);
+          return Store.uploadPhoto(f).then(function (r) {
+            if (!dlg.open) { Store.discardPhoto(r.url); return; }
+            if (r.small) small++;
+            draftPhotos.push(r.url);
+            newUploads.push(r.url);
             renderPhotoGrid();
           }, function () { failed++; }).then(function () { uploading--; syncSaveButton(); });
         });
       }, Promise.resolve()).then(function () {
-        label.textContent = failed ? failed + (failed === 1 ? ' photo' : ' photos') + ' didn’t upload. Try adding ' + (failed === 1 ? 'it' : 'them') + ' again.' : '';
+        var notes = [];
+        if (failed) notes.push(failed + (failed === 1 ? ' photo' : ' photos') + ' didn’t upload. Try adding ' + (failed === 1 ? 'it' : 'them') + ' again.');
+        if (small) notes.push((small === 1 ? 'One photo is' : small + ' photos are') + ' small and may look blurry. For sharper results, use the original from your phone or camera.');
+        label.textContent = notes.join(' ');
       });
     });
 
