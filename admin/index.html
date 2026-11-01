@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Manage Inventory &mdash; Capital Machine Tools</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@700&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" href="../cmt-badge-solid.png" type="image/png">
+<link rel="stylesheet" href="../style.css">
+<script src="../logo-fit.js" defer></script>
+<link rel="stylesheet" href="../inventory.css">
+<script src="../inventory.js" defer></script>
+</head>
+<body data-page="admin">
+
+<header class="masthead">
+  <div class="wrap masthead-inner">
+    <a class="logo-lockup" href="../index.html">
+      <img class="logo-badge" src="../cmt-badge.png" alt="" width="161" height="161">
+      <span class="logo-text">
+        <span class="logo-name">Capital Machine Tools</span>
+        <span class="logo-rule" aria-hidden="true"></span>
+        <span class="logo-tagline">Buying &amp; Selling Since 1990</span>
+      </span>
+    </a>
+  </div>
+</header>
+
+<div class="admin-bar">
+  <div class="wrap">
+    <strong>Inventory manager</strong>
+    <span class="admin-links">
+      <a href="../inventory.html" target="_blank" rel="noopener">View the public Inventory page &#8599;</a>
+      <a href="/cdn-cgi/access/logout">Sign out</a>
+    </span>
+  </div>
+</div>
+
+<main class="wrap page">
+  <aside class="rail" aria-label="Filter machines">
+    <div class="rail-inner">
+      <p class="rail-title">Filter machines</p>
+      <div class="filter-host"></div>
+    </div>
+  </aside>
+  <div class="sheet" id="app"></div>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <a class="foot-lockup" href="../index.html">
+      <img class="foot-badge" src="../cmt-badge-reversed.png" alt="" width="77" height="77">
+      <h3>Capital Machine Tools</h3>
+    </a>
+    <dl class="footer-grid">
+      <div>
+        <dt>Contact</dt>
+        <dd>Dave Henchcliffe</dd>
+      </div>
+      <div>
+        <dt>Phone</dt>
+        <dd><a href="tel:+12032541643">203-254-1643</a></dd>
+      </div>
+      <div>
+        <dt>Cell</dt>
+        <dd><a href="tel:+12037676705">203-767-6705</a></dd>
+      </div>
+      <div>
+        <dt>Email</dt>
+        <dd><a href="mailto:dave@capitalmachinetools.com">dave@capitalmachinetools.com</a></dd>
+      </div>
+    </dl>
+    <p class="copyright">&copy; 2026 Capital Machine Tools. All rights reserved.</p>
+  </div>
+</footer>
+
+<dialog id="editor" aria-labelledby="dlg-title">
+  <form id="editor-form" novalidate>
+    <div class="dlg-head">
+      <h2 id="dlg-title">Add a machine</h2>
+    </div>
+    <div class="dlg-body">
+
+      <div class="field full">
+        <span class="lbl-plain" id="pub-lbl">On the website?</span>
+        <div class="seg" role="radiogroup" aria-labelledby="pub-lbl">
+          <label><input type="radio" name="published" value="yes"><span class="yes">Show it</span></label>
+          <label><input type="radio" name="published" value="no"><span class="no">Hide it</span></label>
+        </div>
+        <p class="help" id="pub-help">Hidden machines stay in your list but don’t show on the website.</p>
+      </div>
+
+      <div class="field">
+        <label for="f-status">Status</label>
+        <select id="f-status" name="status">
+          <option value="available">Available</option>
+          <option value="pending">Pending sale</option>
+          <option value="sold">Sold</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="f-category">Category <span class="req">*</span></label>
+        <select id="f-category" name="category" required></select>
+        <div id="newcat-wrap" hidden>
+          <input id="f-newcat" aria-label="New category name" placeholder="New category name" style="margin-top:8px">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="f-make">Manufacturer <span class="req">*</span></label>
+        <input id="f-make" name="manufacturer" list="makes" required placeholder="e.g., Haas" autocomplete="off">
+        <datalist id="makes"></datalist>
+        <p class="help">Start typing to pick one already listed, or type a new name to add it.</p>
+      </div>
+
+      <div class="field">
+        <label for="f-model">Model <span class="req">*</span></label>
+        <input id="f-model" name="model" required placeholder="e.g., VF-2" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="f-type">Machine type <span class="req">*</span></label>
+        <input id="f-type" name="type" required placeholder="e.g., Vertical machining center" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="f-year">Year</label>
+        <input id="f-year" name="year" type="number" inputmode="numeric" min="1900" max="2100" placeholder="Leave blank if unknown">
+      </div>
+
+      <div class="field">
+        <label for="f-price">Price ($)</label>
+        <input id="f-price" name="price" type="number" inputmode="numeric" min="0" step="1" placeholder="e.g., 32500">
+      </div>
+
+      <div class="field">
+        <span class="lbl-plain">Price on the website</span>
+        <label class="check"><input name="showPrice" type="checkbox" checked> Show the price</label>
+        <p class="help">Unchecked shows “Call for price.”</p>
+      </div>
+
+      <div class="field full">
+        <span class="lbl-plain">Key specs</span>
+        <p class="help" style="margin:0 0 8px">The names fill in when you pick a category. Change them to suit the machine.</p>
+        <div id="specrows"></div>
+      </div>
+
+      <div class="field full">
+        <label for="f-power">Electrical</label>
+        <input id="f-power" name="power" placeholder="e.g., 230V 3-phase">
+      </div>
+
+      <div class="field full">
+        <label for="f-condition">Condition and features</label>
+        <textarea id="f-condition" name="condition" placeholder="e.g., Runs under power. Tooling included. Coolant system replaced 2023."></textarea>
+      </div>
+
+      <div class="field full">
+        <label for="f-desc">More details (optional)</label>
+        <textarea id="f-desc" name="description" placeholder="Anything else a buyer should know."></textarea>
+      </div>
+
+      <div class="field full">
+        <label for="f-video">YouTube video link (optional)</label>
+        <input id="f-video" name="video" type="url" inputmode="url" placeholder="e.g., https://youtu.be/abc123xyz00" autocomplete="off">
+        <p class="help">Upload the video to YouTube as “Unlisted,” then paste the link from YouTube’s Share button.</p>
+      </div>
+
+      <div class="field full">
+        <label for="photo-input">Photos</label>
+        <input id="photo-input" type="file" accept="image/*" multiple>
+        <p class="help">The main photo is the one shown in the listings. <span id="photo-status" role="status"></span></p>
+        <div class="photogrid" id="photogrid"></div>
+      </div>
+
+    </div>
+    <div class="dlg-foot">
+      <button type="button" class="btn small danger" id="delete-btn">Delete</button>
+      <div class="right">
+        <button type="button" class="btn small secondary" id="cancel-btn">Cancel</button>
+        <button type="submit" class="btn small" id="save-btn">Save machine</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="confirm-dlg" aria-labelledby="confirm-msg">
+  <form method="dialog" class="confirm-box">
+    <p id="confirm-msg"></p>
+    <div class="confirm-actions">
+      <button value="cancel" class="btn small secondary">Cancel</button>
+      <button value="ok" class="btn small" id="confirm-ok">Confirm</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+</body>
+</html>
