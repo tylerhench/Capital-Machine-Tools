@@ -30,6 +30,13 @@ Machines and photos are stored in Cloudflare (database **D1** and photo
 storage **R2**), **not** in these files. Uploading new versions of the files
 never deletes or changes Dave's listings.
 
+## After editing inventory.css or inventory.js
+
+Browsers keep old copies of these two files. After changing either one, open
+`inventory.html` **and** `admin/index.html` and raise the number at the end of
+their links by one (for example `inventory.css?v=2` → `inventory.css?v=3`).
+That makes every browser fetch the new version right away.
+
 ## Before uploading a redesign
 
 Upload the changes to a branch other than your main one first. Cloudflare
@@ -51,7 +58,7 @@ Cloudflare dashboard → **Workers & Pages** → your site → **Settings** →
 **Build**. Note the **production branch** (usually `main`).
 
 ### 2. Create the database
-**Storage & Databases → D1 SQL Database → Create**. Name: `cmt-inventory`.
+**Storage & Databases → D1 SQLite Database → Create**. Name: `cmt-inventory`.
 
 ### 3. Create the photo storage
 **Storage & Databases → R2 Object Storage**. Turn on R2 if asked (a payment
