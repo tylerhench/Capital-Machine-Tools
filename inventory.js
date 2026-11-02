@@ -1015,11 +1015,28 @@
           (until ? ' <span class="muted">eBay asks you to reconnect by ' + esc(until) + '.</span>' : '') + '</p>' +
         '<div class="ebayactions">' +
           '<button type="button" class="btn small" id="ebay-import"' + (importing ? ' disabled' : '') + '>' + (importing ? 'Importing…' : 'Import eBay listings') + '</button>' +
+          (unpublishedImports() && !importing
+            ? '<button type="button" class="btn small secondary" id="ebay-clear">Remove unpublished imports (' + unpublishedImports() + ')</button>'
+            : '') +
           '<button type="button" class="btn small secondary" id="ebay-disconnect"' + (importing ? ' disabled' : '') + '>Disconnect</button>' +
         '</div>';
     }
     box.hidden = false;
-    box.innerHTML = html + (ebayNote ? '<p class="ebaynote" role="status">' + ebayNote + '</p>' : '');
+    box.innerHTML = html + (ebayNote ? '<div class="ebaynote" role="status">' + ebayNote + '</div>' : '');
+    var clr = document.getElementById('ebay-clear');
+    if (clr) clr.addEventListener('click', function () {
+      var n = unpublishedImports();
+      askConfirm('Remove the ' + n + (n === 1 ? ' machine' : ' machines') + ' imported from eBay that aren’t on the website yet? ' +
+        'Their eBay listings aren’t touched, and you can import them again afterwards.', 'Remove').then(function (ok) {
+        if (!ok) return;
+        request('POST', '/api/admin/ebay/clear-imports').then(function (r) {
+          return Store.all().then(function (list) {
+            machines = list; ebayNote = ''; route();
+            toast('Removed ' + r.removed + (r.removed === 1 ? ' machine' : ' machines'));
+          });
+        }, function (err) { toast(err.message, true); });
+      });
+    });
     var imp = document.getElementById('ebay-import');
     if (imp) imp.addEventListener('click', importFromEbay);
     var dis = document.getElementById('ebay-disconnect');
@@ -1033,6 +1050,11 @@
   }
 
   function setEbayNote(html) { ebayNote = html; renderEbayBox(); }
+
+  /* Machines brought in from eBay that haven't been put on the website yet */
+  function unpublishedImports() {
+    return machines.filter(function (m) { return m.ebayItemId && !m.published && m.status !== 'sold'; }).length;
+  }
 
   function importFromEbay() {
     importing = true;
@@ -1050,18 +1072,24 @@
         ' as hidden machines for you to review?';
       return askConfirm(msg, 'Import').then(function (ok) {
         if (!ok) { importing = false; setEbayNote(''); return; }
-        var done = 0, failed = [], fewerPhotos = 0;
+        var done = 0, failed = [], fewerPhotos = [];
         return todo.reduce(function (chain, l, i) {
           return chain.then(function () {
-            setEbayNote('Importing ' + (i + 1) + ' of ' + todo.length + ': ' + esc(l.title) + '…');
+            var label = 'Importing ' + (i + 1) + ' of ' + todo.length + ': ' + esc(l.title);
+            setEbayNote(label + '…');
             return request('POST', '/api/admin/ebay/import/' + encodeURIComponent(l.itemId)).then(function (r) {
-              if (r.imported) { done++; if (r.photos < r.of) fewerPhotos++; }
+              if (!r.imported) return;
+              done++;
+              return copyPhotos(r.machine.id, r.pictures || [], label).then(function (copied) {
+                var wanted = (r.pictures || []).length;
+                if (copied < wanted) fewerPhotos.push('<li>' + esc(l.title) + ': ' + copied + ' of ' + wanted + ' photos</li>');
+              });
             }, function (err) { failed.push('<li>' + esc(l.title) + ': ' + esc(err.message) + '</li>'); });
           });
         }, Promise.resolve()).then(function () {
           importing = false;
           var note = 'Imported ' + done + (done === 1 ? ' machine' : ' machines') + ' as <strong>hidden</strong>. Check each one, then press “Hidden” to put it on the website.' +
-            (fewerPhotos ? ' ' + fewerPhotos + (fewerPhotos === 1 ? ' machine is' : ' machines are') + ' missing some photos; compare with eBay.' : '') +
+            (fewerPhotos.length ? '<br>' + fewerPhotos.length + (fewerPhotos.length === 1 ? ' machine is' : ' machines are') + ' missing some photos; compare with eBay:<ul>' + fewerPhotos.join('') + '</ul>' : '') +
             (failed.length ? '<br>' + failed.length + ' couldn’t be imported:<ul>' + failed.join('') + '</ul>' : '');
           return Store.all().then(function (list) { machines = list; route(); setEbayNote(note); });
         });
@@ -1070,6 +1098,18 @@
       importing = false;
       setEbayNote(esc(err.message));
     });
+  }
+
+  /* Copies a listing's eBay photos one at a time; resolves to how many arrived */
+  function copyPhotos(machineId, pictures, label) {
+    var copied = 0;
+    return pictures.reduce(function (chain, url, n) {
+      return chain.then(function () {
+        setEbayNote(label + ' (photo ' + (n + 1) + ' of ' + pictures.length + ')…');
+        return request('POST', '/api/admin/ebay/photo/' + encodeURIComponent(machineId), { url: url })
+          .then(function (r) { if (r.added) copied++; }, function () { /* counted as missing */ });
+      });
+    }, Promise.resolve()).then(function () { return copied; });
   }
 
   /* After coming back from eBay's approval page */

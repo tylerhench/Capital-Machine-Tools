@@ -594,8 +594,12 @@ dialog::backdrop { background: rgba(8, 16, 26, 0.55); }
 .ebaybox p { margin: 0 !important; }
 .ebaybox .muted { color: var(--ink-soft); }
 .ebayactions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-.ebaynote { margin-top: 10px !important; padding-top: 10px; border-top: 1px solid var(--card-rule); }
+.ebaynote { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--card-rule); }
 .ebaynote ul { margin: 6px 0 0; padding-left: 20px; }
 .tags { display: inline-flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
 .tag.ebay { background: #e6eefc; color: #1d4fa5; }
 .publink { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+
+/* Card specs: long labels wrap, short values stay on one line */
+.specs:not(.large) { grid-template-columns: minmax(35%, 1fr) minmax(0, max-content); }
+.specs:not(.large) dd { padding-left: 10px; }

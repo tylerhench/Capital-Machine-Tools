@@ -104,12 +104,13 @@ export async function deletePhotos(env, urls) {
 }
 
 export function slugify(s) {
-  return s.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 70) || 'machine';
+  return s.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').slice(0, 70).replace(/^-+|-+$/g, '') || 'machine';
 }
 
 export async function uniqueId(env, base) {
-  const rows = await env.DB.prepare('SELECT id FROM machines WHERE id = ?1 OR id LIKE ?2')
-    .bind(base, base + '-%').all();
+  // Plain text comparison: Cloudflare's database rejects LIKE patterns over ~50 characters
+  const rows = await env.DB.prepare('SELECT id FROM machines WHERE id = ?1 OR substr(id, 1, ?2) = ?3')
+    .bind(base, base.length + 1, base + '-').all();
   const taken = new Set(rows.results.map(r => r.id));
   let id = base, n = 2;
   while (taken.has(id)) id = base + '-' + n++;

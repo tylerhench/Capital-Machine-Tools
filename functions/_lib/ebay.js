@@ -193,8 +193,9 @@ export function blocks(xml, name) {
 }
 /* Text of the first <name>, decoded */
 export function tag(xml, name) {
-  const b = blocks(xml, name)[0];
-  return b === undefined ? '' : decodeEntities(b.replace(/^<!\[CDATA\[|\]\]>$/g, '')).trim();
+  // first match only: no need to scan the rest of a large listing
+  const m = new RegExp('<' + name + '(?:\\s[^>]*)?>([\\s\\S]*?)</' + name + '>').exec(xml);
+  return m ? decodeEntities(m[1].replace(/^<!\[CDATA\[|\]\]>$/g, '')).trim() : '';
 }
 export function tags(xml, name) {
   return blocks(xml, name).map(b => decodeEntities(b.replace(/^<!\[CDATA\[|\]\]>$/g, '')).trim());
@@ -288,6 +289,27 @@ export function largestPicture(url) {
     .replace(/\$_\d+\.(jpg|jpeg|png)/i, '$_57.$1');
 }
 
+/* When eBay has no "Model" detail, find the model in the title, e.g.
+   "MBB-1680" from "Sunnen Hone MBB-1680, Power Stroke…". The year and
+   brand are skipped wherever they appear. Prefers a model-number-like
+   word (has a digit, or a letter code like "HLV-H"); otherwise the first
+   few words up to a describing word ("Series I" from "Series I Vertical Knee Mill"). */
+const DESCRIBING = /^(vertical|horizontal|cnc|manual|automatic|auto|universal|engine|toolroom|tool|lathe|lathes|mill|mills|milling|knee|press|punch|brake|shear|grinder|grinding|surface|cylindrical|saw|band|drill|machine|machining|center|centre|edm|wire|sinker|hone|honing|comparator|optical|with|w\/|and|lot|lots|tooling|for|used)$/i;
+function modelFromTitle(title, manufacturer) {
+  const brandWords = manufacturer.toLowerCase().split(/\s+/);
+  const words = title.split(/[\s,;]+/).filter(Boolean)
+    .filter(w => !/^(19|20)\d\d$/.test(w))                         // years
+    .filter(w => !brandWords.includes(w.toLowerCase()));             // the brand
+  const looksLikeModel = w => /^[A-Za-z0-9][\w./-]*$/.test(w) && (
+    (/\d/.test(w) && !/^\d+(\.\d+)?("|in|ton|tons|hp|v|ft|mm)?$/i.test(w)) ||   // has a digit, isn't just a measurement
+    /^[A-Z]{1,5}-[A-Z0-9]{1,5}$/.test(w));                                        // letter code like HLV-H
+  const code = words.find(looksLikeModel);
+  if (code) return code.slice(0, 80);
+  const lead = [];
+  for (const w of words) { if (DESCRIBING.test(w) || lead.length === 3) break; lead.push(w); }
+  return (lead.join(' ') || words.slice(0, 3).join(' ') || title).slice(0, 80);
+}
+
 /* eBay's category names are plural ("Drill Presses"); a machine is one */
 function singular(name) {
   return String(name || '').trim()
@@ -296,7 +318,11 @@ function singular(name) {
 }
 
 /* Everything the website needs, plus what Phase 2 needs to list again */
-export function machineFromItem(itemXml) {
+export function machineFromItem(fullXml) {
+  // The description can be most of the listing (eBay templates are large).
+  // Take it out once, then read everything else from what's left.
+  const descriptionHtml = listingDescription(fullXml);
+  const itemXml = fullXml.replace(/<Description(?:\s[^>]*)?>[\s\S]*?<\/Description>/g, '');
   const title = tag(itemXml, 'Title');
   const specifics = specificsOf(itemXml);
   const spec = re => (specifics.find(r => re.test(r[0])) || [])[1] || '';
@@ -304,8 +330,8 @@ export function machineFromItem(itemXml) {
 
   let manufacturer = spec(/^(brand|manufacturer)$/i);
   let model = spec(/^(model|mpn)$/i);
-  if (!manufacturer) manufacturer = title.split(/\s+/)[0] || 'Unknown';
-  if (!model) model = title.replace(new RegExp('^' + manufacturer.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*', 'i'), '').slice(0, 80) || title.slice(0, 80);
+  if (!manufacturer) manufacturer = title.split(/\s+/).find(w => !/^(19|20)\d\d$/.test(w)) || 'Unknown';   // first word that isn't a year
+  if (!model) model = modelFromTitle(title, manufacturer);
 
   const yearText = spec(/^(year|year of manufacture|model year)$/i) || (title.match(/\b(19[2-9]\d|20[0-4]\d)\b/) || [])[1] || '';
   const type = spec(/^(type|machine type|equipment type)$/i) || singular(categoryName.split(':').pop()) || 'Machine';
@@ -333,7 +359,7 @@ export function machineFromItem(itemXml) {
       specs: specifics.filter(r => !SKIP_SPECIFICS.test(r[0])).slice(0, 3),
       power: spec(/^(voltage|power|power source|electrical)$/i),
       condition: tag(itemXml, 'ConditionDescription'),
-      description: htmlToText(listingDescription(itemXml)).slice(0, 8000),
+      description: htmlToText(descriptionHtml.slice(0, 200000)).slice(0, 8000),
       video: ''
     },
     pictures,                           // eBay's own addresses; see largestPicture()
