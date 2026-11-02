@@ -177,10 +177,12 @@
       : '<span class="price call">Call for price</span>';
   }
   function tagHTML(m) {
-    if (m.status === 'pending') return '<span class="tag pending">Pending sale</span>';
-    if (ADMIN && m.status === 'sold') return '<span class="tag sold">Sold</span>';
-    if (ADMIN && !m.published) return '<span class="tag hidden">Hidden</span>';
-    return '';
+    var t = '';
+    if (m.status === 'pending') t = '<span class="tag pending">Pending sale</span>';
+    else if (ADMIN && m.status === 'sold') t = '<span class="tag sold">Sold</span>';
+    else if (ADMIN && !m.published) t = '<span class="tag hidden">Hidden</span>';
+    if (ADMIN && m.ebayItemId) t += '<span class="tag ebay">eBay</span>';
+    return t ? '<span class="tags">' + t + '</span>' : '';
   }
   var PH_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M21 17l-5-5-8 7"/></svg>';
   function placeholder(m) {
@@ -230,7 +232,8 @@
       : '';
     var intro = ADMIN
       ? '<h2 class="section-title">Your inventory</h2>' +
-        '<p class="lead">Add machines, update prices and mark them sold. Changes show on the public Inventory page right away.</p>'
+        '<p class="lead">Add machines, update prices and mark them sold. Changes show on the public Inventory page right away.</p>' +
+        '<div class="ebaybox" id="ebaybox"></div>'
       : '<h2 class="section-title">Machines in Stock</h2>' +
         '<p class="lead">Every machine is in our 50,000 sq. ft. warehouse, and most can be run under power for your inspection. Call Dave at <a href="tel:' + TEL + '">' + PHONE + '</a>.</p>';
 
@@ -257,6 +260,7 @@
     $('#q').addEventListener('input', function (e) { query = e.target.value.trim(); renderResults(); });
     $('#sort').addEventListener('change', function (e) { sort = e.target.value; renderResults(); });
     if (ADMIN) {
+      renderEbayBox();
       $('#add-btn').addEventListener('click', function () { openEditor(null); });
       $('#showsold').addEventListener('change', function (e) { showSold = e.target.checked; renderResults(); });
     }
@@ -546,13 +550,18 @@
           '<div class="gallery"><div class="main">' + mainImg + '</div>' + thumbs + videoHTML(m) + '</div>' +
           '<div class="info">' +
             (ADMIN ? '<div class="adminrow">' + adminButtons(m) + '</div>' : '') +
-            (ADMIN && isLive(m) ? '<p class="publink"><a href="/inventory/' + encodeURIComponent(m.id) + '" target="_blank" rel="noopener">View on website &#8599;</a></p>' : '') +
+            (ADMIN && (isLive(m) || m.ebayItemId)
+              ? '<p class="publink">' +
+                  (isLive(m) ? '<a href="/inventory/' + encodeURIComponent(m.id) + '" target="_blank" rel="noopener">View on website &#8599;</a>' : '') +
+                  (m.ebayItemId ? '<a href="' + ebayItemUrl(m.ebayItemId) + '" target="_blank" rel="noopener">View on eBay &#8599;</a>' : '') +
+                '</p>'
+              : '') +
             '<p class="kicker">' + esc(kicker(m)) + '</p>' +
             '<h1>' + esc(name(m)) + '</h1>' +
             '<div class="pricerow">' + priceHTML(m) + tagHTML(m) + '</div>' +
             specsHTML(rows, 'large') +
-            (m.condition ? '<h3>Condition and Features</h3><p>' + esc(m.condition) + '</p>' : '') +
-            (m.description ? '<h3>More Details</h3><p>' + esc(m.description) + '</p>' : '') +
+            (m.condition ? '<h3>Condition and Features</h3><p class="text">' + esc(m.condition) + '</p>' : '') +
+            (m.description ? '<h3>More Details</h3><p class="text">' + esc(m.description) + '</p>' : '') +
             '<div class="buttons">' +
               '<a class="btn" href="tel:' + TEL + '">Call ' + PHONE + '</a>' +
               '<a class="btn secondary" href="mailto:' + EMAIL + '?subject=' + subject + '">Email About This Machine</a>' +
@@ -947,7 +956,7 @@
     $('#delete-btn').style.visibility = m ? 'visible' : 'hidden';
 
     var d = m || { published: true, status: 'available', category: '', year: '', manufacturer: '', model: '', type: '',
-      price: '', showPrice: true, specs: [], power: '', condition: '', description: '', photos: [], video: '' };
+      price: '', showPrice: false, specs: [], power: '', condition: '', description: '', photos: [], video: '' };
     setPublished(m ? isLive(m) : true);
     form.status.value = d.status;
     form.category.value = d.category;
@@ -969,6 +978,112 @@
     setupEditor.syncSoldLock();
     dlg.showModal();
     $('.dlg-body', dlg).scrollTop = 0;
+  }
+
+  /* ================================================================
+     eBay (admin only): connect, import
+     ================================================================ */
+
+  var ebay = null;          // connection status from /api/admin/ebay/status
+  var ebayNote = '';        // last import result, shown in the box
+  var importing = false;
+
+  function ebayItemUrl(id) {
+    return (ebay && ebay.sandbox ? 'https://www.sandbox.ebay.com/itm/' : 'https://www.ebay.com/itm/') + encodeURIComponent(id);
+  }
+
+  function loadEbayStatus() {
+    return request('GET', '/api/admin/ebay/status').then(function (st) { ebay = st; renderEbayBox(); }, function () {});
+  }
+
+  function renderEbayBox() {
+    var box = document.getElementById('ebaybox');
+    if (!box || !ebay) return;
+    var practice = ebay.sandbox ? ' <span class="tag hidden">eBay practice system</span>' : '';
+    var html;
+    if (ebay.setupError) {
+      html = '<p><strong>eBay:</strong> ' + esc(ebay.setupError) + '</p>';
+    } else if (!ebay.configured) {
+      box.hidden = true;     // nothing to show until eBay is set up on the website
+      return;
+    } else if (!ebay.connected) {
+      html = '<p><strong>eBay:</strong> not connected.' + practice + ' Connect your eBay seller account to import and list machines from here.</p>' +
+        '<div class="ebayactions"><a class="btn small" href="/api/admin/ebay/connect">Connect eBay account</a></div>';
+    } else {
+      var until = ebay.expires ? new Date(ebay.expires).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '';
+      html = '<p><strong>eBay:</strong> connected' + (ebay.user ? ' as <strong>' + esc(ebay.user) + '</strong>' : '') + '.' + practice +
+          (until ? ' <span class="muted">eBay asks you to reconnect by ' + esc(until) + '.</span>' : '') + '</p>' +
+        '<div class="ebayactions">' +
+          '<button type="button" class="btn small" id="ebay-import"' + (importing ? ' disabled' : '') + '>' + (importing ? 'Importing…' : 'Import eBay listings') + '</button>' +
+          '<button type="button" class="btn small secondary" id="ebay-disconnect"' + (importing ? ' disabled' : '') + '>Disconnect</button>' +
+        '</div>';
+    }
+    box.hidden = false;
+    box.innerHTML = html + (ebayNote ? '<p class="ebaynote" role="status">' + ebayNote + '</p>' : '');
+    var imp = document.getElementById('ebay-import');
+    if (imp) imp.addEventListener('click', importFromEbay);
+    var dis = document.getElementById('ebay-disconnect');
+    if (dis) dis.addEventListener('click', function () {
+      askConfirm('Disconnect eBay? Your eBay listings stay as they are; the website just stops managing them until you connect again.', 'Disconnect').then(function (ok) {
+        if (!ok) return;
+        request('POST', '/api/admin/ebay/disconnect').then(function () { ebayNote = ''; toast('eBay disconnected'); loadEbayStatus(); },
+          function (err) { toast(err.message, true); });
+      });
+    });
+  }
+
+  function setEbayNote(html) { ebayNote = html; renderEbayBox(); }
+
+  function importFromEbay() {
+    importing = true;
+    setEbayNote('Checking your eBay listings…');
+    request('GET', '/api/admin/ebay/active').then(function (listings) {
+      var todo = listings.filter(function (l) { return !l.machineId; });
+      var already = listings.length - todo.length;
+      if (!todo.length) {
+        importing = false;
+        setEbayNote(listings.length ? 'All ' + listings.length + ' eBay listings are already on the website.' : 'No live listings found on eBay.');
+        return;
+      }
+      var msg = 'Found ' + listings.length + ' live ' + (listings.length === 1 ? 'listing' : 'listings') + ' on eBay' +
+        (already ? ' (' + already + ' already on the website)' : '') + '. Import ' + (todo.length === 1 ? 'it' : 'the ' + todo.length) +
+        ' as hidden machines for you to review?';
+      return askConfirm(msg, 'Import').then(function (ok) {
+        if (!ok) { importing = false; setEbayNote(''); return; }
+        var done = 0, failed = [], fewerPhotos = 0;
+        return todo.reduce(function (chain, l, i) {
+          return chain.then(function () {
+            setEbayNote('Importing ' + (i + 1) + ' of ' + todo.length + ': ' + esc(l.title) + '…');
+            return request('POST', '/api/admin/ebay/import/' + encodeURIComponent(l.itemId)).then(function (r) {
+              if (r.imported) { done++; if (r.photos < r.of) fewerPhotos++; }
+            }, function (err) { failed.push('<li>' + esc(l.title) + ': ' + esc(err.message) + '</li>'); });
+          });
+        }, Promise.resolve()).then(function () {
+          importing = false;
+          var note = 'Imported ' + done + (done === 1 ? ' machine' : ' machines') + ' as <strong>hidden</strong>. Check each one, then press “Hidden” to put it on the website.' +
+            (fewerPhotos ? ' ' + fewerPhotos + (fewerPhotos === 1 ? ' machine is' : ' machines are') + ' missing some photos; compare with eBay.' : '') +
+            (failed.length ? '<br>' + failed.length + ' couldn’t be imported:<ul>' + failed.join('') + '</ul>' : '');
+          return Store.all().then(function (list) { machines = list; route(); setEbayNote(note); });
+        });
+      });
+    }, function (err) {
+      importing = false;
+      setEbayNote(esc(err.message));
+    });
+  }
+
+  /* After coming back from eBay's approval page */
+  function ebayReturnMessage() {
+    var q = new URLSearchParams(location.search).get('ebay');
+    if (!q) return;
+    history.replaceState(null, '', location.pathname + location.hash);
+    var msgs = {
+      connected: ['eBay connected.', false],
+      declined: ['eBay connection was cancelled.', true],
+      expired: ['That eBay approval took too long. Please try again.', true]
+    };
+    var m = msgs[q] || ['eBay connection didn’t work: ' + q.replace(/^failed: /, ''), true];
+    toast(m[0], m[1]);
   }
 
   /* ================================================================
@@ -1018,6 +1133,7 @@
     return;
   }
   if (!ADMIN) readFilterQuery();
+  if (ADMIN) { ebayReturnMessage(); loadEbayStatus(); }
 
   app.innerHTML = '<p class="counts">Loading machines…</p>';
   Store.all().then(function (list) {

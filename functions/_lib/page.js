@@ -96,8 +96,8 @@ export function detailHTML(m) {
         '<h1>' + esc(name(m)) + '</h1>' +
         '<div class="pricerow">' + priceHTML(m) + tag + '</div>' +
         specsHTML(rows) +
-        (m.condition ? '<h3>Condition and Features</h3><p>' + esc(m.condition) + '</p>' : '') +
-        (m.description ? '<h3>More Details</h3><p>' + esc(m.description) + '</p>' : '') +
+        (m.condition ? '<h3>Condition and Features</h3><p class="text">' + esc(m.condition) + '</p>' : '') +
+        (m.description ? '<h3>More Details</h3><p class="text">' + esc(m.description) + '</p>' : '') +
         '<div class="buttons">' +
           '<a class="btn" href="tel:' + TEL + '">Call ' + PHONE + '</a>' +
           '<a class="btn secondary" href="mailto:' + EMAIL + '?subject=' + subject + '">Email About This Machine</a>' +

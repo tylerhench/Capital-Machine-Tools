@@ -249,6 +249,7 @@
   font-size: 18px; font-weight: 700; color: var(--navy);
 }
 .info p { margin: 0; }
+.info p.text { white-space: pre-line; }   /* keeps Dave's line breaks */
 .info .adminrow { margin: 0 0 20px; border: 1px solid var(--card-rule); border-radius: 6px; }
 
 /* ---------- Editor dialog (admin) ---------- */
@@ -581,3 +582,20 @@ dialog::backdrop { background: rgba(8, 16, 26, 0.55); }
   font-size: 28px; line-height: 1.2; color: var(--navy);
 }
 .publink { margin: -8px 0 16px !important; font-size: 14px; font-weight: 700; }
+
+/* ---------- eBay (admin) ---------- */
+
+.ebaybox {
+  margin: 0 0 18px; padding: 12px 16px;
+  border: 1px solid var(--card-rule); border-left: 4px solid var(--steel); border-radius: 6px;
+  background: var(--card-bg);
+  font-size: 15px;
+}
+.ebaybox p { margin: 0 !important; }
+.ebaybox .muted { color: var(--ink-soft); }
+.ebayactions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.ebaynote { margin-top: 10px !important; padding-top: 10px; border-top: 1px solid var(--card-rule); }
+.ebaynote ul { margin: 6px 0 0; padding-left: 20px; }
+.tags { display: inline-flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
+.tag.ebay { background: #e6eefc; color: #1d4fa5; }
+.publink { display: flex; flex-wrap: wrap; gap: 6px 18px; }

@@ -39,7 +39,10 @@ export function fromRow(r) {
     description: r.description,
     photos: safeParse(r.photos, []),
     video: r.video,
-    dateAdded: r.date_added
+    dateAdded: r.date_added,
+    ebayItemId: r.ebay_item_id || '',
+    ebayStatus: r.ebay_status || '',
+    ebayError: r.ebay_error || ''
   };
 }
 

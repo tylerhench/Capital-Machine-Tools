@@ -23,6 +23,10 @@ updates from `/admin` without touching any code.
 | `functions/inventory/[id].js`, `functions/_lib/page.js` | Builds each machine's own page (`/inventory/2008-haas-vf-2`) for Google and sharing | Its page layout mirrors `renderDetail()` in `inventory.js`; change both together |
 | `functions/sitemap.xml.js` | The sitemap Google reads; lists every machine on the website automatically | No need to edit |
 | `robots.txt` | Tells search engines to skip `/admin` and the backend | No need to edit |
+| `functions/_lib/ebay.js`, `functions/api/admin/ebay/` | The eBay connection: Dave's sign-in, importing listings | Only if you mean to change how eBay works |
+| `functions/api/ebay/account-deletion.js` | Answers eBay's required account-deletion notices | No need to edit |
+| `migrations/` | Database updates, each run once in the D1 console, in order | No need to edit |
+| `privacy.html` | Privacy policy (eBay asks for one) | Yes |
 | `schema.sql` | Creates the database table (used once at setup) | No need to edit |
 | `logo-fit.js` | Fits the tagline under the logo | Leave alone |
 | `cmt-badge.png` | Logo in the header | Replace with a same-named file to change it |
@@ -124,3 +128,32 @@ dragged folders. Cloudflare deploys automatically in a minute or two.
 ## Adding or removing people who can sign in
 Zero Trust → **Access → Applications → CMT Admin → Policies**, then edit the
 email list. No code changes needed.
+
+---
+
+## eBay connection
+
+Dave connects his eBay seller account once from the admin page ("Connect
+eBay account"), then can import his live eBay listings onto the website.
+Imported machines arrive **hidden** for checking.
+
+### Setup (once)
+1. **Database:** run `migrations/002-ebay.sql` in the D1 console
+   (cmt-inventory → Console), the same way as `schema.sql`.
+2. **Settings** (Pages project → Settings → Variables and Secrets, Production):
+
+| Name | Type | Value |
+|---|---|---|
+| `EBAY_ENV` | Text | `sandbox` (eBay's practice system) or `production` |
+| `EBAY_CLIENT_ID` | Text | App ID from developer.ebay.com, for that environment |
+| `EBAY_CLIENT_SECRET` | **Secret** | Cert ID from developer.ebay.com, for that environment |
+| `EBAY_RUNAME` | Text | The RuName from developer.ebay.com → User Tokens, for that environment |
+| `EBAY_VERIFICATION_TOKEN` | **Secret** | Production only: any 32–80 letters/numbers; enter the same on eBay's Alerts & Notifications page |
+
+3. The RuName's **auth accepted** and **declined** URLs are both
+   `https://capitalmachinetools.com/api/admin/ebay/callback`, and its privacy
+   policy URL is `https://capitalmachinetools.com/privacy`.
+
+Switching `EBAY_ENV` between `sandbox` and `production` (with that
+environment's keys) requires connecting the eBay account again.
+eBay also asks for a fresh connection every 18 months; the admin page shows the date.
