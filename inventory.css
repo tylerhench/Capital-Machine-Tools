@@ -389,7 +389,7 @@ dialog::backdrop { background: rgba(8, 16, 26, 0.55); }
     display: block;
     position: absolute; top: 0; bottom: 0; right: 100%;
     width: calc((100vw - var(--wrap)) / 2);
-    padding: 0 0 0 20px;
+    padding: 16px 0 0 20px;   /* gap below the menu bar */
   }
   .rail-inner {
     position: sticky; top: 16px;
