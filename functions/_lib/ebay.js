@@ -254,7 +254,7 @@ export function guessCategory(text) {
   return null;
 }
 
-const SKIP_SPECIFICS = /^(brand|manufacturer|model|mpn|year|year of manufacture|model year|type|machine type|equipment type|upc|ean|isbn|country\/region of manufacture|custom bundle|modified item|non-domestic product|california prop 65 warning|condition|item length|item width|item height|item weight)$/i;
+const SKIP_SPECIFICS = /^(voltage|power|power source|electrical|brand|manufacturer|model|mpn|year|year of manufacture|model year|type|machine type|equipment type|upc|ean|isbn|country\/region of manufacture|custom bundle|modified item|non-domestic product|california prop 65 warning|condition|item length|item width|item height|item weight)$/i;
 
 export function specificsOf(itemXml) {
   const box = blocks(itemXml, 'ItemSpecifics')[0] || '';
@@ -289,6 +289,51 @@ export function largestPicture(url) {
     .replace(/\$_\d+\.(jpg|jpeg|png)/i, '$_57.$1');
 }
 
+/* eBay sellers often fill item details with non-answers */
+function realValue(v) {
+  v = String(v || '').trim();
+  if (/^(unbranded|unknown|n\/?a|na|none|other|generic|does not apply|not applicable|see description|-+)$/i.test(v)) return '';
+  if (isMeasurement(v)) return '';
+  return v;
+}
+
+/* 17"  36in  1-1/2  60  5HP  3/4"  12x36  — numbers and sizes, not names */
+function isMeasurement(w) {
+  return /^[\d.,\/\-x×"'”″]+$/i.test(w) ||
+    /^\d[\d.,\/\-]*\s*("|'|”|″|in|inch|inches|ft|mm|cm|m|ton|tons|t|hp|kw|v|volt|volts|ph|phase|lb|lbs|rpm|gal|psi|amp|amps)\.?$/i.test(w);
+}
+
+/* Well-known machine-tool makers, so they're found anywhere in a title.
+   Longer names first, so "Clausing Colchester" wins over "Clausing". */
+const MAKERS = [
+  'Kearney & Trecker', 'Kearney Trecker', 'Brown & Sharpe', 'Brown and Sharpe', 'Jones & Lamson', 'Jones & Shipman',
+  'Giddings & Lewis', 'Lodge & Shipley', 'Pratt & Whitney', 'Warner & Swasey', 'Roper Whitney', 'Boyar Schultz', 'Boyar-Schultz',
+  'Clausing Colchester', 'Cincinnati Milacron', 'Hitachi Seiki', 'Mori Seiki', 'Optical Gaging', 'South Bend', 'Southwestern Industries',
+  'Acme Gridley', 'Hyd Mech', 'Hyd-Mech', 'Do All', 'Di-Acro', 'Hardinge', 'Bridgeport', 'Haas', 'Mazak', 'Okuma', 'Fadal', 'Hurco',
+  'Clausing', 'Colchester', 'Monarch', 'LeBlond', 'Cincinnati', 'Okamoto', 'Chevalier', 'Harig', 'Mitsui', 'Landis', 'Norton', 'Blanchard',
+  'Mattison', 'DoAll', 'Kalamazoo', 'Marvel', 'Amada', 'Ellis', 'Wellsaw', 'Startrite', 'Sunnen', 'Barnesdrill', 'Delta', 'Rockwell',
+  'Powermatic', 'Wilton', 'Baileigh', 'Arboga', 'Fosdick', 'Summit', 'Wysong', 'Niagara', 'Bliss', 'Minster', 'Verson', 'Diacro', 'Pexto',
+  'Piranha', 'Scotchman', 'Accurpress', 'Strippit', 'Wiedemann', 'Mitsubishi', 'Sodick', 'Charmilles', 'Agie', 'Makino', 'Fanuc',
+  'Doosan', 'Daewoo', 'Hyundai', 'Femco', 'Leadwell', 'Milltronics', 'Kitamura', 'Matsuura', 'Tsugami', 'Citizen', 'Miyano', 'Nakamura',
+  'Takisawa', 'Romi', 'Fryer', 'Prototrak', 'Acer', 'Lagun', 'Webb', 'Enco', 'Grizzly', 'Starrett', 'Mitutoyo', 'Moore', 'DeVlieg',
+  'Sheldon', 'Atlas', 'Logan', 'Rivett', 'Hendey', 'Gisholt', 'Davenport', 'Torrington', 'Hartford', 'Ikegai', 'Supermax', 'Harrison',
+  'Kasto', 'Behringer', 'Cosen', 'HEM', 'Everett', 'Tannewitz', 'Gorton', 'Deckel', 'Thiel', 'Aciera', 'Schaublin', 'Traub', 'Emco',
+  'Victor', 'Sharp', 'Kent', 'Jet', 'Wells', 'Whitney', 'Edwards', 'Chicago', 'Bystronic', 'Trumpf', 'Lincoln', 'Miller', 'Hypertherm',
+  'Thermwood', 'Brother', 'Nilson', 'Baird', 'Index', 'Star', 'Yam', 'Eagle', 'Vectrax', 'Kurt', 'Wohlhaupter', 'Royal', 'Haeger',
+  'PEM', 'Pemserter', 'Bruderer', 'Aida', 'Komatsu', 'Seyi', 'Toyo', 'Engel', 'Van Dorn', 'Gleason', 'Fellows', 'Barber Colman',
+  'Lucas', 'Defiance', 'Avey', 'Allen', 'Buffalo', 'Walker', 'Arter', 'Thompson', 'Covel', 'Gallmeyer', 'Reid', 'Taft-Peirce'
+];
+const STOP = /^(used|new|nice|great|rare|heavy|duty|large|small|big|mini|the|a|an|lot|of|w\/|with|and|for|by|to|sale|running|tested|working|ton|tons|hp|phase|inch|in|ft|x|used,|cnc|manual|automatic|auto|vertical|horizontal|universal|industrial|machine|machines|shop|metal|metalworking|tool|tools|equipment|precision)$/i;
+
+function makerFromTitle(title) {
+  const t = ' ' + title.toLowerCase().replace(/[,;()]/g, ' ') + ' ';
+  const known = MAKERS.find(mk => t.includes(' ' + mk.toLowerCase() + ' '));
+  if (known) return known;
+  const word = title.split(/[\s,;()]+/).filter(Boolean)
+    .find(w => /^[A-Za-z]/.test(w) && w.length > 1 && !isMeasurement(w) && !STOP.test(w) && !DESCRIBING.test(w));
+  return word || 'Unknown';
+}
+
 /* When eBay has no "Model" detail, find the model in the title, e.g.
    "MBB-1680" from "Sunnen Hone MBB-1680, Power Stroke…". The year and
    brand are skipped wherever they appear. Prefers a model-number-like
@@ -305,9 +350,18 @@ function modelFromTitle(title, manufacturer) {
     /^[A-Z]{1,5}-[A-Z0-9]{1,5}$/.test(w));                                        // letter code like HLV-H
   const code = words.find(looksLikeModel);
   if (code) return code.slice(0, 80);
+  // a few plain words, skipping sizes and units, up to the first describing word
   const lead = [];
-  for (const w of words) { if (DESCRIBING.test(w) || lead.length === 3) break; lead.push(w); }
-  return (lead.join(' ') || words.slice(0, 3).join(' ') || title).slice(0, 80);
+  for (const w of words) {
+    if (DESCRIBING.test(w) || lead.length === 3) break;
+    if (isMeasurement(w) || STOP.test(w)) continue;
+    lead.push(w);
+  }
+  if (lead.length) return lead.join(' ').slice(0, 80);
+  // only sizes left (e.g. "12 x 36 Engine Lathe"): use them
+  const sizes = [];
+  for (const w of words) { if (DESCRIBING.test(w) || sizes.length === 3) break; sizes.push(w); }
+  return (sizes.join(' ') || title).slice(0, 80);
 }
 
 /* eBay's category names are plural ("Drill Presses"); a machine is one */
@@ -328,9 +382,9 @@ export function machineFromItem(fullXml) {
   const spec = re => (specifics.find(r => re.test(r[0])) || [])[1] || '';
   const categoryName = tag(blocks(itemXml, 'PrimaryCategory')[0] || '', 'CategoryName');
 
-  let manufacturer = spec(/^(brand|manufacturer)$/i);
-  let model = spec(/^(model|mpn)$/i);
-  if (!manufacturer) manufacturer = title.split(/\s+/).find(w => !/^(19|20)\d\d$/.test(w)) || 'Unknown';   // first word that isn't a year
+  let manufacturer = realValue(spec(/^(brand|manufacturer)$/i));
+  let model = realValue(spec(/^(model|mpn)$/i)).replace(/^(model|mdl|mod)\.?\s*(no\.?|number|#)?\s*:?\s*/i, '');
+  if (!manufacturer) manufacturer = makerFromTitle(title);
   if (!model) model = modelFromTitle(title, manufacturer);
 
   const yearText = spec(/^(year|year of manufacture|model year)$/i) || (title.match(/\b(19[2-9]\d|20[0-4]\d)\b/) || [])[1] || '';

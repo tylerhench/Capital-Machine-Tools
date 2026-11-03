@@ -385,6 +385,7 @@
     var q = new URLSearchParams();
     selectedCats.forEach(function (c) { q.append('cat', c); });
     selectedMakes.forEach(function (mk) { q.append('make', mk); });
+    if (query) q.append('q', query);
     var s = q.toString();
     return s ? '?' + s : '';
   }
@@ -424,6 +425,7 @@
       return;
     }
     results.innerHTML = '<ul class="grid">' + list.map(cardHTML).join('') + '</ul>';
+    if (!ADMIN) rememberList(list);
     wireAdminButtons(results);
     equalizeCards();
   }
@@ -524,8 +526,7 @@
      ================================================================ */
 
   function renderDetail(m) {
-    var rows = m.specs.slice();
-    if (m.power) rows.push(['Electrical', m.power]);
+    var rows = specRows(m);
     var many = m.photos.length > 1;
     var mainImg = m.photos[0]
       ? '<img id="main-img" src="' + esc(m.photos[0]) + '" alt="' + esc(name(m)) + ', photo 1">' +
@@ -545,7 +546,7 @@
 
     app.innerHTML =
       '<article>' +
-        '<a class="back" href="#">&larr; All machines</a>' +
+        '<div class="machnav"><a class="back" href="#">&larr; All machines</a><nav class="stepper" aria-label="Browse machines"></nav></div>' +
         '<div class="detail-grid">' +
           '<div class="gallery"><div class="main">' + mainImg + '</div>' + thumbs + videoHTML(m) + '</div>' +
           '<div class="info">' +
@@ -561,17 +562,18 @@
             '<div class="pricerow">' + priceHTML(m) + tagHTML(m) + '</div>' +
             specsHTML(rows, 'large') +
             (m.condition ? '<h3>Condition and Features</h3><p class="text">' + esc(m.condition) + '</p>' : '') +
-            (m.description ? '<h3>More Details</h3><p class="text">' + esc(m.description) + '</p>' : '') +
             '<div class="buttons">' +
               '<a class="btn" href="tel:' + TEL + '">Call ' + PHONE + '</a>' +
               '<a class="btn secondary" href="mailto:' + EMAIL + '?subject=' + subject + '">Email About This Machine</a>' +
             '</div>' +
             '<p class="note">Want to see it run? Call ahead and we will have it under power when you arrive.</p>' +
           '</div>' +
+          (m.description ? '<div class="details"><h3>More Details</h3><p class="text">' + esc(m.description) + '</p></div>' : '') +
         '</div>' +
       '</article>';
 
     if (m.photos.length) setupGallery(m);
+    renderStepper(m.id);
     wireAdminButtons(app);
   }
 
@@ -682,6 +684,68 @@
     e.preventDefault();
     gallery.show(gallery.at() + dir);
   });
+
+  /* ================================================================
+     Previous / Next between machines ("3 of 10 · Drills")
+     The public Inventory page remembers the list a buyer is looking at
+     (filters and order) for this browser tab; the admin page uses the
+     list on screen.
+     ================================================================ */
+
+  var NAV_KEY = 'cmt-machine-list';
+
+  function describeFilters() {
+    var parts = selectedCats.concat(selectedMakes);
+    if (query) parts.push('“' + query + '”');
+    return parts.join(' · ');
+  }
+
+  function rememberList(list) {
+    try {
+      sessionStorage.setItem(NAV_KEY, JSON.stringify({
+        ids: list.map(function (m) { return m.id; }), label: describeFilters(), query: filterQuery()
+      }));
+    } catch (e) { /* private browsing: falls back to the whole inventory */ }
+  }
+
+  function navContext(id) {
+    if (ADMIN) {
+      var shown = sorted(machines.filter(function (m) { return inGrid(m) && matches(m) && inCats(m) && inMakes(m); }));
+      if (!shown.some(function (m) { return m.id === id; })) shown = sorted(machines.filter(inGrid));
+      return { ids: shown.map(function (m) { return m.id; }), label: describeFilters(), back: '#' };
+    }
+    var saved = null;
+    try { saved = JSON.parse(sessionStorage.getItem(NAV_KEY) || 'null'); } catch (e) {}
+    if (saved && saved.ids && saved.ids.indexOf(id) !== -1) {
+      return { ids: saved.ids, label: saved.label, back: '/inventory' + (saved.query || '') };
+    }
+    // Arrived from Google or a shared link: step through everything in stock, newest first
+    var live = machines.filter(isLive).sort(function (a, b) { return b.dateAdded.localeCompare(a.dateAdded); });
+    return { ids: live.map(function (m) { return m.id; }), label: '', back: '/inventory' };
+  }
+
+  function renderStepper(id) {
+    var nav = $('.stepper', app);
+    if (!nav) return;
+    var ctx = navContext(id);
+    var back = $('.machnav .back', app);
+    if (back) back.setAttribute('href', ctx.back);
+    var i = ctx.ids.indexOf(id), n = ctx.ids.length;
+    if (i === -1 || n < 2) { nav.innerHTML = ''; return; }
+    var link = function (otherId) { return (ADMIN ? '#' : '/inventory/') + encodeURIComponent(otherId); };
+    nav.innerHTML =
+      '<a class="step" rel="prev" href="' + link(ctx.ids[(i - 1 + n) % n]) + '">' + ICON_PREV + '<span>Previous</span></a>' +
+      '<span class="pos">' + (i + 1) + ' of ' + n + (ctx.label ? ' <small>· ' + esc(ctx.label) + '</small>' : '') + '</span>' +
+      '<a class="step" rel="next" href="' + link(ctx.ids[(i + 1) % n]) + '"><span>Next</span>' + ICON_NEXT + '</a>';
+  }
+
+  /* Specs plus Electrical, unless the same value is already among the specs */
+  function specRows(m) {
+    var rows = m.specs.slice();
+    var power = (m.power || '').trim();
+    if (power && !rows.some(function (r) { return String(r[1]).trim().toLowerCase() === power.toLowerCase(); })) rows.push(['Electrical', power]);
+    return rows;
+  }
 
   /* Shows YouTube's preview image first; the player loads on click */
   function videoHTML(m) {
@@ -1157,13 +1221,18 @@
      controls and the filter list. */
   if (MACHINE_PAGE) {
     var dataEl = document.getElementById('machine-data');
+    var current = null;
     if (dataEl) {
       try {
-        var current = JSON.parse(dataEl.textContent);
+        current = JSON.parse(dataEl.textContent);
         if (current.photos.length) setupGallery(current);
       } catch (e) { /* the page still reads fine without the photo controls */ }
     }
-    Store.all().then(function (list) { machines = list; renderFilters(); }, function () {});
+    Store.all().then(function (list) {
+      machines = list;
+      renderFilters();
+      if (current) renderStepper(current.id);
+    }, function () {});
     return;
   }
 

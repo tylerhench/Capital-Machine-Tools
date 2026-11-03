@@ -67,8 +67,10 @@ export function pageTitle(m) {
 
 /* The page content, inside <div id="app"> */
 export function detailHTML(m) {
+  // Electrical, unless the same value is already among the specs
   const rows = m.specs.slice();
-  if (m.power) rows.push(['Electrical', m.power]);
+  const power = (m.power || '').trim();
+  if (power && !rows.some(r => String(r[1]).trim().toLowerCase() === power.toLowerCase())) rows.push(['Electrical', power]);
   const many = m.photos.length > 1;
   const main = m.photos[0]
     ? '<img id="main-img" src="' + esc(m.photos[0]) + '" alt="' + esc(name(m)) + ', photo 1">' +
@@ -88,7 +90,7 @@ export function detailHTML(m) {
   const tag = m.status === 'pending' ? '<span class="tag pending">Pending sale</span>' : '';
 
   return '<article>' +
-    '<a class="back" href="/inventory">&larr; All machines</a>' +
+    '<div class="machnav"><a class="back" href="/inventory">&larr; All machines</a><nav class="stepper" aria-label="Browse machines"></nav></div>' +
     '<div class="detail-grid">' +
       '<div class="gallery"><div class="main">' + main + '</div>' + thumbs + videoHTML(m) + '</div>' +
       '<div class="info">' +
@@ -97,13 +99,13 @@ export function detailHTML(m) {
         '<div class="pricerow">' + priceHTML(m) + tag + '</div>' +
         specsHTML(rows) +
         (m.condition ? '<h3>Condition and Features</h3><p class="text">' + esc(m.condition) + '</p>' : '') +
-        (m.description ? '<h3>More Details</h3><p class="text">' + esc(m.description) + '</p>' : '') +
         '<div class="buttons">' +
           '<a class="btn" href="tel:' + TEL + '">Call ' + PHONE + '</a>' +
           '<a class="btn secondary" href="mailto:' + EMAIL + '?subject=' + subject + '">Email About This Machine</a>' +
         '</div>' +
         '<p class="note">Want to see it run? Call ahead and we will have it under power when you arrive.</p>' +
       '</div>' +
+      (m.description ? '<div class="details"><h3>More Details</h3><p class="text">' + esc(m.description) + '</p></div>' : '') +
     '</div>' +
   '</article>';
 }
