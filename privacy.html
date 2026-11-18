@@ -7,12 +7,16 @@
 <meta name="description" content="How Capital Machine Tools handles information on this website.">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@700&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="icon" href="cmt-badge-solid.png" type="image/png">
 <link rel="stylesheet" href="style.css">
 <script src="logo-fit.js" defer></script>
+<link rel="stylesheet" href="navy.css?v=18">
+<script src="site.js?v=2" defer></script>
 </head>
-<body>
+<body class="navy">
+
+<div class="sheen" aria-hidden="true"><i></i></div>
 
 <header class="masthead">
   <div class="wrap masthead-inner">
@@ -24,12 +28,17 @@
         <span class="logo-tagline">Buying &amp; Selling Since 1990</span>
       </span>
     </a>
+    <p class="masthead-call">
+      <a class="call-main" href="tel:+12037676705" aria-label="Call Dave at 203-767-6705">203-767-6705</a>
+    </p>
   </div>
 </header>
 
-<nav class="nav">
+<nav class="nav" aria-label="Main">
   <div class="wrap">
-    <ul>
+    <button type="button" class="nav-toggle" aria-expanded="false" aria-controls="site-menu"><span class="nav-burger" aria-hidden="true"></span><span class="nav-toggle-label">Menu</span></button>
+    <a class="nav-call" href="tel:+12037676705" aria-label="Call Dave at 203-767-6705"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>203-767-6705</a>
+    <ul id="site-menu">
       <li><a href="index.html">About</a></li>
       <li><a href="products.html">Products &amp; Services</a></li>
       <li><a href="inventory.html">Inventory</a></li>
@@ -38,10 +47,10 @@
   </div>
 </nav>
 
-<main class="wrap">
+<main class="wrap stack">
   <div class="sheet">
 
-    <h2 class="section-title">Privacy Policy</h2>
+    <h1 class="section-title">Privacy Policy</h1>
 
     <p class="lead">Capital Machine Tools keeps this simple: we only collect what you choose to send us, and we use it only to answer you.</p>
 
@@ -79,19 +88,22 @@
         <dd>Dave Henchcliffe</dd>
       </div>
       <div>
-        <dt>Phone</dt>
-        <dd><a href="tel:+12032541643">203-254-1643</a></dd>
-      </div>
-      <div>
         <dt>Cell</dt>
         <dd><a href="tel:+12037676705">203-767-6705</a></dd>
+      </div>
+      <div>
+        <dt>Office</dt>
+        <dd><a href="tel:+12032541643">203-254-1643</a></dd>
       </div>
       <div>
         <dt>Email</dt>
         <dd><a href="mailto:dave@capitalmachinetools.com">dave@capitalmachinetools.com</a></dd>
       </div>
     </dl>
-    <p class="copyright">&copy; 2026 Capital Machine Tools. All rights reserved.</p>
+    <p class="copyright">
+      <span>&copy; 2026 Capital Machine Tools. All rights reserved.</span>
+      <span class="credit">Website by <a href="https://beaumontwest.com" target="_blank" rel="noopener">Beaumont West Solutions</a></span>
+    </p>
   </div>
 </footer>
 
