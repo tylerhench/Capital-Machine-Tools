@@ -1,0 +1,544 @@
+/* Capital Machine Tools — navy redesign (public pages only)
+   ------------------------------------------------------------------
+   Loaded LAST on index, products, inventory, contact and privacy, and
+   switched on by class="navy" on <body>. Everything here starts with
+   ".navy", so the admin page (which has neither) keeps its own look.
+
+   SAFE TO EDIT: the numbers in the first block below.
+   style.css and inventory.css are not changed by the redesign. */
+
+body.navy {
+  --wrap: 1180px;
+  --knurl-gap: 20px;        /* distance between the knurl lines */
+  --sheen-strength: 1;      /* 0 turns the moving sheen off */
+  --sheen-cycle: 8s;        /* 4s crossing the page + 4s rest */
+  --navy: #1b3c5e;
+  --steel: #3d7099;
+  --sky: #8fb2ce;
+  --text: #22282e;
+  --text-soft: #4b5560;
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.30), 0 6px 16px rgba(0, 0, 0, 0.28);
+  background: #1a3550;
+  color: var(--text);
+}
+
+/* ---------- Knurled background and the sheen that sweeps across it ----------
+   .sheen is a fixed layer behind the page. Its own background is the knurl.
+   <i> is a slanted band that slides left to right; the brighter knurl inside
+   it slides the opposite way by the same amount, so the bright lines stay
+   exactly on top of the dark ones and only the band of light appears to move.
+   Both moves are transforms, which the browser runs without repainting. */
+
+.sheen {
+  position: fixed; inset: 0; z-index: -1;
+  overflow: hidden; pointer-events: none;
+  container-type: size;
+  background-color: #1a3550;
+  background-image:
+    repeating-linear-gradient(30deg, rgba(0, 0, 0, 0.18) 0 1px, transparent 1px var(--knurl-gap)),
+    repeating-linear-gradient(-30deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px var(--knurl-gap)),
+    linear-gradient(180deg, #2f5174, #1a3550);
+}
+.sheen i {
+  position: absolute; top: 0; left: 0;
+  width: 50vw; height: 100vh;
+  width: 50cqw; height: 100cqh;
+  overflow: hidden;
+  opacity: var(--sheen-strength);
+  transform-origin: 0 0;
+  transform: translateX(-60cqw) skewX(-15deg);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.55) 32%, #000 50%, rgba(0, 0, 0, 0.55) 68%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.55) 32%, #000 50%, rgba(0, 0, 0, 0.55) 68%, transparent 100%);
+  animation: sheen-band var(--sheen-cycle) linear infinite;
+}
+.sheen i::before {
+  content: "";
+  position: absolute; top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  width: 100cqw; height: 100cqh;
+  transform-origin: 0 0;
+  transform: skewX(15deg) translateX(60cqw);
+  background-image:
+    repeating-linear-gradient(30deg, rgba(190, 215, 240, 0.30) 0 1px, transparent 1px var(--knurl-gap)),
+    repeating-linear-gradient(-30deg, rgba(255, 255, 255, 0.55) 0 1px, transparent 1px var(--knurl-gap)),
+    linear-gradient(rgba(143, 178, 206, 0.16), rgba(143, 178, 206, 0.16));
+  animation: sheen-hold var(--sheen-cycle) linear infinite;
+}
+@keyframes sheen-band {
+  0%        { transform: translateX(-50cqw) skewX(-15deg); }
+  50%, 100% { transform: translateX(calc(100cqw + 27cqh)) skewX(-15deg); }
+}
+@keyframes sheen-hold {
+  0%        { transform: skewX(15deg) translateX(50cqw); }
+  50%, 100% { transform: skewX(15deg) translateX(calc(-100cqw - 27cqh)); }
+}
+/* Older browsers without container units: keep the knurl, skip the sheen */
+@supports not (width: 1cqw) { .sheen i { display: none; } }
+@media (prefers-reduced-motion: reduce) { .sheen i { display: none; } }
+
+/* ---------- Header: centered logo, phone line underneath ----------
+   --logo sizes the whole lockup (badge, name, rule, tagline are in em).
+   On wider screens the round badge stands beside the whole text block
+   (name, tagline and phone line) and is centered on it top to bottom.
+   The block is padded equally on both sides, so the NAME stays on the
+   page's center line, in line with the menu and the cards below. */
+
+.navy .wrap { padding-left: 24px; padding-right: 24px; }
+
+.navy .masthead { padding-top: 14px; padding-bottom: 4px; }
+.navy .masthead-inner {
+  --logo: clamp(24px, 4.6vw, 56px);
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 0; text-align: center;
+}
+.navy .logo-lockup { font-size: var(--logo); margin-right: 2.63em; }   /* 2.63em = badge + gap */
+/* Smaller badge, and its built-in transparent edge trimmed top and bottom,
+   so it no longer sets a tall header around the name */
+.navy .logo-lockup .logo-badge { width: 2.2em; height: 2.2em; margin: -0.1em 0; }
+
+/* Tagline: normal tracking, centered under the name. logo-fit.js still
+   stretches it on the admin page; here the !important wins over that. */
+.navy .logo-lockup .logo-tagline {
+  font-size: 0.4em;
+  letter-spacing: 0.13em !important;
+  padding-left: 0.13em;        /* balances the space trailing the last letter */
+  text-align: center;
+  margin-top: 0.75em;
+}
+
+.navy .masthead-call {
+  margin: 0; line-height: 1.25;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0 14px;
+}
+.navy .call-label { font-size: 15px; font-weight: 700; color: var(--steel); }
+.navy .call-main {
+  font-family: "Bitter", Georgia, serif; font-weight: 700; font-size: 26px;
+  color: var(--navy);
+}
+.navy .call-main:hover { color: var(--steel); }
+.navy .call-alt { font-size: 15px; color: var(--text-soft); }
+.navy .call-alt a { color: inherit; }
+.navy .masthead-call a { display: inline-flex; align-items: center; min-height: 44px; }   /* full-size tap area */
+.navy .masthead-call a:focus-visible { outline: 3px solid var(--steel); outline-offset: 3px; border-radius: 3px; }
+
+@media (min-width: 601px) {
+  .navy .masthead { padding-top: 18px; padding-bottom: 18px; }
+  .navy .masthead-inner {
+    --badge: clamp(8.4rem, 12.4vw, 11.2rem);  /* badge size: raise the last number to make it bigger */
+    --side: calc(var(--badge) + 28px);    /* badge + space before the name */
+    position: relative;
+    min-height: var(--badge);             /* header is never shorter than the badge, */
+    justify-content: center;              /* and the words sit centered beside it */
+    width: fit-content; max-width: 100%;
+    padding-left: calc(24px + var(--side));
+    padding-right: calc(24px + var(--side));
+  }
+  .navy .logo-lockup { margin-right: 0; }
+  .navy .logo-lockup .logo-badge {
+    position: absolute; left: 24px; top: 50%;
+    width: var(--badge); height: var(--badge);
+    margin: 0;
+    transform: translateY(-50%);
+  }
+}
+@media (min-width: 601px) and (max-width: 900px) {
+  .navy .masthead-inner { --side: calc(var(--badge) + 18px); }
+}
+
+@media (max-width: 600px) {
+  .navy .masthead { padding-top: 20px; padding-bottom: 6px; }
+  .navy .logo-lockup { margin-right: 0; }      /* no room to nudge on a phone */
+  .navy .call-main { font-size: 22px; }
+  .navy .masthead-call a { min-height: 36px; }   /* two short rows instead of two tall ones */
+}
+
+/* ---------- Header finish: brushed steel, center lit ----------
+   Fine horizontal streaks over a base that is bright in the middle and
+   darker steel at both sides, like a metal plate lit from the front. */
+
+.navy {
+  --steel-base: linear-gradient(90deg, #b9c8d6 0%, #e2e9ef 25%, #f8fafb 50%, #e2e9ef 75%, #b9c8d6 100%);
+  --steel-shine: rgba(255, 255, 255, 0);
+}
+
+.navy .masthead {
+  background:
+    linear-gradient(100deg, transparent 28%, var(--steel-shine) 46%, transparent 64%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.8) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(0deg, rgba(27, 60, 94, 0.07) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(0deg, rgba(27, 60, 94, 0.05) 0 2px, transparent 2px 13px),
+    repeating-linear-gradient(0deg, rgba(27, 60, 94, 0.04) 0 1px, transparent 1px 29px),
+    var(--steel-base);
+}
+
+/* ---------- Underline under "Capital Machine Tools": double rule ----------
+   A navy line over a light blue line. It is pulled in slightly at each
+   end so it starts at the edge of the C and stops at the end of the s,
+   not at the invisible space the letters carry around them. */
+
+.navy .logo-lockup .logo-rule {
+  height: 0.15em; border-radius: 0;
+  margin-left: 0.045em; margin-right: 0.015em;
+  background:
+    linear-gradient(#1b3c5e, #1b3c5e) top / 100% 38% no-repeat,
+    linear-gradient(#8fb2ce, #8fb2ce) bottom / 100% 30% no-repeat;
+}
+
+/* ---------- Fonts: Source Serif 4 + Source Sans 3 ----------
+   Three roles, used everywhere on the public pages:
+     --f-head   the name, card titles, big numbers, phone number
+     --f-title  section headings ("About Us") and sub-headings
+     --f-body   everything else
+   The fonts are loaded by the Google Fonts link in each page's <head>. */
+
+.navy {
+  --f-head: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --f-title: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --f-body: "Source Sans 3", "Segoe UI", Arial, sans-serif;
+}
+
+.navy, .navy * { font-family: var(--f-body) !important; }
+.navy .logo-lockup .logo-name, .navy .cta-title, .navy .stat-num, .navy .rbody h3,
+.navy .card h3, .navy .info h1, .navy .info h3, .navy .empty h3, .navy .empty.gone h1,
+.navy .details h3, .navy .gallery .vidtitle, .navy .rail-title, .navy .more,
+.navy .call-main, .navy .footer .foot-lockup h3 {
+  font-family: var(--f-head) !important;
+}
+.navy .section-title, .navy .sub {
+  font-family: var(--f-title) !important;
+  font-weight: 700; letter-spacing: 0;
+}
+
+/* ---------- Menu bar ---------- */
+
+.navy .nav { border-bottom: 3px solid var(--steel); }
+.navy .nav ul { justify-content: center; }
+.navy .nav li:first-child a { border-left: 1px solid rgba(255, 255, 255, 0.12); }
+.navy .nav a { color: #d6e0e9; }
+.navy .nav a:hover, .navy .nav a:focus { background: #234b73; color: #ffffff; }
+.navy .nav a.current { background: #234b73; color: #ffffff; }
+
+/* ---------- Page layout: white cards stacked on the knurl ---------- */
+
+.navy main.wrap:not(.page) { padding-top: 36px; padding-bottom: 56px; }
+.navy .stack { display: flex; flex-direction: column; gap: 26px; }
+
+.navy .sheet {
+  border: 0; border-radius: 6px;
+  padding: 40px 48px 44px;
+  box-shadow: var(--card-shadow);
+  outline: 1px solid var(--steel); outline-offset: -8px;   /* the keyline */
+}
+
+/* Double rule on the white cards, matching the one under the name:
+   a 2px navy line with a thin light blue line just inside it. */
+.navy .sheet,
+.navy .page { position: relative; outline: 2px solid var(--navy); outline-offset: -9px; }
+.navy .sheet::before,
+.navy .page::before {
+  content: ""; position: absolute; inset: 11px;
+  border: 1px solid var(--sky); border-radius: 1px;
+  pointer-events: none;
+}
+.navy .page > .sheet { outline: 0; }
+.navy .page > .sheet::before { content: none; }
+
+.navy .section-title {
+  display: table; margin: 0 0 24px; padding: 0; border: 0;
+  font-family: "Nunito Sans", -apple-system, "Segoe UI", Arial, sans-serif;
+  font-size: 24px; font-weight: 800; line-height: 1.2; letter-spacing: -0.01em;
+  color: var(--navy);
+  text-wrap: balance;
+}
+.navy .section-title::after {
+  content: ""; display: block; width: 100%; height: 3px;
+  margin-top: 10px; border-radius: 2px; background: var(--steel);
+}
+.navy h1.section-title, .navy #app > h2.section-title { font-size: 32px; }
+.navy h1.section-title::after, .navy #app > h2.section-title::after { margin-top: 12px; }
+.navy .section-title.spaced { margin-top: 40px; }
+
+.navy .lead { margin: 0 0 14px; font-size: 20px; line-height: 1.55; }
+.navy .sheet > p:not([class]), .navy .cols p:not([class]) { font-size: 17px; line-height: 1.65; }
+.navy .note { font-size: 17px; line-height: 1.65; color: var(--text-soft); }
+.navy .sheet a:focus-visible { outline: 3px solid var(--steel); outline-offset: 2px; border-radius: 3px; }
+
+.navy .cols { display: flex; flex-wrap: wrap; gap: 20px 48px; }
+.navy .cols > * { flex: 1 1 380px; min-width: 0; }
+.navy .cols p { margin: 0 0 14px; line-height: 1.65; }
+.navy .cols p:last-child { margin-bottom: 0; }
+.navy .sub { margin: 0 0 10px; font-size: 20px; font-weight: 800; color: var(--navy); }
+
+/* ---------- Buttons ---------- */
+
+.navy .buttons { gap: 12px; margin-top: 28px; }
+.navy .btn {
+  padding: 14px 22px; border-radius: 4px;
+  background: var(--navy); border-color: var(--navy);
+  font-size: 13px; letter-spacing: 0.08em; text-align: center;
+}
+.navy .btn:hover, .navy .btn:focus { background: var(--steel); border-color: var(--steel); }
+.navy .btn.secondary { background: #ffffff; color: var(--navy); border-color: var(--navy); }
+.navy .btn.secondary:hover, .navy .btn.secondary:focus { background: var(--navy); color: #ffffff; border-color: var(--navy); }
+.navy .btn.small { padding: 9px 14px; font-size: 12px; }
+.navy .btn:focus-visible { outline: 3px solid var(--sky); outline-offset: 2px; }
+
+/* ---------- Home: the three facts ---------- */
+
+.navy .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+.navy .stat { padding: 22px 26px; }
+.navy .stat p { margin: 0; }
+.navy .stat-num { font-family: "Bitter", Georgia, serif; font-weight: 700; font-size: 34px; line-height: 1.25; color: var(--navy); }
+.navy .stat-label { margin-top: 4px !important; font-size: 16px; color: var(--text-soft); }
+
+/* ---------- Home: Recently Added (filled in by site.js) ---------- */
+
+.navy .sheet-head {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px;
+  margin-bottom: 24px;
+}
+.navy .sheet-head .section-title { margin-bottom: 0; }
+.navy .more { font-family: "Bitter", Georgia, serif; font-size: 18px; font-weight: 700; color: var(--navy); }
+.navy .more:hover { color: var(--steel); }
+
+.navy .recent-grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+.navy .rcard {
+  display: flex; flex-direction: column; height: 100%;
+  border: 1px solid var(--steel); border-radius: 6px; overflow: hidden;
+  background: #ffffff; color: var(--text); text-decoration: none;
+  box-shadow: 0 1px 3px rgba(27, 60, 94, 0.16);
+  transition: box-shadow 0.15s ease;
+}
+.navy .rcard:hover { box-shadow: 0 4px 14px rgba(27, 60, 94, 0.22); }
+.navy .rcard:hover h3 { color: var(--steel); }
+.navy .rcard:focus-visible { outline: 3px solid var(--steel); outline-offset: 2px; }
+.navy .rphoto { aspect-ratio: 4 / 3; background: #eef1f4; border-bottom: 1px solid #dde1e5; }
+.navy .rphoto img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.navy .rphoto .rph {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+  background: linear-gradient(180deg, #edf1f4 0%, #dfe7ee 100%);
+  color: #5d6b78; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; text-align: center;
+}
+.navy .rbody { padding: 16px 18px 18px; }
+.navy .rbody p { margin: 0; }
+.navy .rkicker { font-size: 13px; font-weight: 700; color: var(--steel); }
+.navy .rbody h3 {
+  margin: 4px 0 8px;
+  font-family: "Bitter", Georgia, serif; font-size: 21px; font-weight: 700; line-height: 1.25; color: var(--navy);
+}
+.navy .rprice { font-size: 15px; font-weight: 700; color: var(--navy); }
+
+/* ---------- Call-to-action strip ---------- */
+
+.navy .cta {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 32px;
+  padding: 30px 48px;
+}
+.navy .cta > div:first-child { flex: 1 1 320px; min-width: 0; }
+.navy .cta-title { margin: 0; font-family: "Bitter", Georgia, serif; font-size: 26px; font-weight: 700; line-height: 1.25; color: var(--navy); }
+.navy .cta p { margin: 6px 0 0; font-size: 17px; color: var(--text-soft); }
+.navy .cta p a { color: var(--navy); font-weight: 700; }
+.navy .cta .buttons { margin-top: 0; }
+
+/* ---------- Products: category tiles that link to the Inventory ---------- */
+
+.navy .capabilities {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px; margin: 26px 0 0;
+}
+.navy .capabilities li, .navy .capabilities li:nth-child(odd) { padding: 0; border: 0; background: none; }
+.navy .capabilities a {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 58px; padding: 14px 18px 14px 20px;
+  background: #f7f9fa;
+  border: 1px solid #c9d8e5; border-left: 5px solid var(--steel); border-radius: 6px;
+  font-size: 17px; font-weight: 700; color: var(--navy); text-decoration: none;
+}
+.navy .capabilities a::after {
+  content: ""; flex: none; width: 8px; height: 8px; margin-right: 4px;
+  border-top: 2.5px solid var(--steel); border-right: 2.5px solid var(--steel);
+  transform: rotate(45deg);
+}
+.navy .capabilities a:hover { background: #e6eef5; border-color: var(--steel); }
+.navy .capabilities + .note { margin-top: 24px; }
+
+/* ---------- Contact: form beside the other ways to reach us ---------- */
+
+.navy .contact-cols { gap: 28px 56px; }
+.navy .contact-cols > .col-main { flex: 999 1 520px; }
+.navy .contact-cols > .reach { flex: 1 1 330px; }
+
+.navy .form {
+  max-width: none; margin-top: 24px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0 20px;
+}
+.navy .form .full { grid-column: 1 / -1; }
+.navy .form > .btn { grid-column: 1 / -1; justify-self: start; }
+.navy .form .captcha { min-height: 78px; }   /* room for the hCaptcha box while it loads */
+.navy .form .field input, .navy .form .field textarea { border-color: #b8c0c8; border-radius: 4px; }
+.navy .form .field label { letter-spacing: 0.04em; }
+
+/* "Other ways to reach us": even rows of icon, small label and value */
+
+.navy .reach .sub { margin-bottom: 14px; }
+.navy .reach-list { display: flex; flex-direction: column; }
+.navy .reach-item {
+  display: grid; grid-template-columns: 40px minmax(0, 1fr); column-gap: 14px; align-items: center;
+  padding: 12px 0; border-top: 1px solid #e3e8ed;
+  color: var(--text); text-decoration: none;
+}
+.navy .reach-item svg {
+  grid-row: 1 / 3; width: 40px; height: 40px; padding: 10px; box-sizing: border-box;
+  border-radius: 50%; background: #eef3f7; color: var(--steel);
+  fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+}
+.navy .reach-label {
+  font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--steel); line-height: 1.3;
+}
+.navy .reach-value { font-size: var(--fs-base); font-weight: 600; color: var(--navy); line-height: 1.4; }   /* the email may wrap only after the @ */
+.navy a.reach-item:hover .reach-value { color: var(--steel); text-decoration: underline; }
+.navy a.reach-item:focus-visible { outline: 3px solid var(--steel); outline-offset: 2px; border-radius: 4px; }
+.navy .reach-list { border-bottom: 1px solid #e3e8ed; }
+
+
+/* ---------- Inventory: one wide card, filters in a box on the left ----------
+   The card is <main class="page">. Inside it sit the filter column (.rail)
+   and the listings (#app), both filled in by inventory.js as before. */
+
+.navy .page {
+  width: calc(100% - 48px); max-width: 1132px;
+  margin: 36px auto 0; padding: 40px 48px 44px;
+  background: #ffffff; border-radius: 6px;
+  box-shadow: var(--card-shadow);
+  outline: 1px solid var(--steel); outline-offset: -8px;
+}
+.navy .page > .sheet { padding: 0; border-radius: 0; box-shadow: none; outline: 0; background: none; }
+
+.navy .rail { display: none; }
+
+@media (min-width: 1000px) {
+  .navy .page { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 0 32px; align-items: start; }
+  .navy .rail {
+    display: block; position: sticky; top: 16px; right: auto; bottom: auto;
+    width: auto; padding: 0;
+  }
+  .navy .rail-inner {
+    position: static; width: auto; max-width: none; margin: 0;
+    max-height: calc(100vh - 32px); overflow-y: auto;
+    padding: 18px 18px 6px;
+    background: #f7f9fa; border: 1px solid var(--steel); border-radius: 6px;
+    box-shadow: none;
+  }
+  .navy .filters-inline { display: none; }
+}
+@media (max-width: 999px) {
+  .navy .filters-inline { display: block; }
+}
+
+/* A machine's own page uses the full width of the card */
+.navy[data-machine-page] .page { display: block; }
+.navy[data-machine-page] .rail { display: none; }
+
+.navy .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
+.navy .card { border-color: var(--steel); box-shadow: 0 1px 3px rgba(27, 60, 94, 0.16); }
+.navy .card:hover { border-color: var(--steel); box-shadow: 0 4px 14px rgba(27, 60, 94, 0.22); }
+.navy .tools input[type="search"], .navy .tools select { border-color: #b8c0c8; }
+
+.navy .after-page { padding-top: 26px; padding-bottom: 56px; }
+
+/* ---------- Tagline: capitals between two short rules ---------- */
+
+.navy .logo-lockup .logo-tagline {
+  display: flex; align-items: center; justify-content: center; gap: 0.7em;
+  font-size: 0.36em; letter-spacing: 0.16em !important; padding-left: 0;
+}
+.navy .logo-lockup .logo-tagline::before,
+.navy .logo-lockup .logo-tagline::after {
+  content: ""; flex: 0 0 2.2em; height: 1.5px; background: currentColor; opacity: 0.7;
+}
+
+/* ---------- Footer: copyright line with the web designer's credit ---------- */
+
+.navy .footer .copyright {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 24px;
+}
+.navy .footer .credit a { color: #c9d8e5; text-decoration: underline; text-underline-offset: 2px; }
+.navy .footer .credit a:hover { color: #ffffff; }
+.navy .footer .credit a:focus-visible { outline: 3px solid #8fb2ce; outline-offset: 2px; border-radius: 2px; }
+
+/* ---------- Type sizes ----------
+   One short scale for the whole site, so headings and text line up
+   with the header. Change a size here and it changes everywhere. */
+
+.navy {
+  --fs-xs: 12px;      /* tiny tags, spec labels */
+  --fs-label: 13px;   /* uppercase labels, buttons, menu */
+  --fs-sm: 15px;      /* secondary text */
+  --fs-base: 17px;    /* body text */
+  --fs-h3: 21px;      /* card titles, sub-headings */
+  --fs-h2: 26px;      /* section headings, phone number */
+  --fs-h1: 32px;      /* page headings, big numbers */
+  font-size: var(--fs-base);
+}
+
+.navy h1.section-title, .navy #app > h2.section-title, .navy .info h1,
+.navy .empty.gone h1, .navy .stat-num { font-size: var(--fs-h1); }
+
+.navy .section-title, .navy .cta-title, .navy .call-main,
+.navy .pricerow .price { font-size: var(--fs-h2); }
+
+.navy .sub, .navy .rbody h3, .navy .card h3, .navy .info h3, .navy .details h3,
+.navy .empty h3, .navy .gallery .vidtitle, .navy .rail-title, .navy .more,
+.navy .footer .foot-lockup h3, .navy .price { font-size: var(--fs-h3); }
+
+.navy .lead { font-size: var(--fs-base); line-height: 1.65; }   /* same as body text */
+
+/* body text: :where() keeps this rule weak, so the sizes above and below win */
+.navy :where(.sheet p, .cols p, .cta p, .note, .capabilities a,
+  .info p.text, .details p.text, .footer-grid dd) { font-size: var(--fs-base); line-height: 1.65; }
+.navy .field input, .navy .field textarea,
+.navy .tools input[type="search"], .navy .tools select { font-size: var(--fs-base); }
+
+.navy .call-label, .navy .call-alt, .navy .stat-label, .navy .rprice, .navy .counts,
+.navy .fopt, .navy .specs dd, .navy .specs.large dd, .navy .help, .navy .flink,
+.navy .footer .copyright, .navy .stepper .pos { font-size: var(--fs-sm); }
+
+.navy .kicker, .navy .rkicker, .navy .lbl, .navy .field label, .navy .btn, .navy .nav a,
+.navy .footer-grid dt, .navy .back, .navy .stepper .step, .navy .price.call,
+.navy .pricerow .price.call { font-size: var(--fs-label); }
+
+.navy .specs dt, .navy .specs.large dt, .navy .tag, .navy .vidbadge, .navy .ph span,
+.navy .rphoto .rph { font-size: var(--fs-xs); }
+
+.navy .logo-lockup .logo-tagline { font-weight: 600; }
+
+/* ---------- Phones ---------- */
+
+@media (max-width: 600px) {
+  .navy .wrap { padding-left: 16px; padding-right: 16px; }
+  .navy .nav a { font-size: 11px; }        /* four menu items fit on one row */
+  .navy .nav li:first-child a { border-left: 0; }
+  .navy .nav .wrap { padding: 0; }
+  .navy main.wrap:not(.page) { padding: 18px 16px 28px; }
+  .navy .stack { gap: 16px; }
+  .navy .sheet { padding: 30px 24px; border-radius: 6px; box-shadow: var(--card-shadow); }
+  .navy .cta { padding: 28px 24px; }
+  .navy .stat { padding: 20px 24px; }
+  .navy .stat-num { font-size: 28px; }
+  .navy h1.section-title, .navy #app > h2.section-title { font-size: 26px; }
+  .navy .capabilities { grid-template-columns: 1fr; }
+  .navy .page { width: calc(100% - 32px); margin-top: 18px; padding: 30px 24px; }
+  .navy .page > .sheet { padding: 0; box-shadow: none; }
+  .navy .after-page { padding: 16px 16px 28px; }
+  .navy .form > .btn { justify-self: stretch; }
+}
+
+@media (max-width: 340px) {
+  .navy .nav a { font-size: 10px; }
+}

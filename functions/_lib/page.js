@@ -57,7 +57,7 @@ export function summary(m) {
   if (hasPrice(m)) parts.push(money.format(m.price));
   const lead = parts.join(', ') + '.';
   const extra = (m.condition || m.description || '').replace(/\s+/g, ' ').trim();
-  const text = lead + ' ' + (extra || 'In our Fairfield, CT warehouse; most machines can be run under power.');
+  const text = lead + ' ' + (extra || 'In our Bridgeport, CT warehouse; most machines can be run under power.');
   return text.length > 155 ? text.slice(0, 152).replace(/\s+\S*$/, '') + '…' : text;
 }
 

@@ -7,12 +7,16 @@
 <meta name="description" content="CNC machinery, fabricating machinery, grinders, lathes, milling machinery and presses. View current listings on eBay and Surplus Record.">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@700&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="icon" href="cmt-badge-solid.png" type="image/png">
 <link rel="stylesheet" href="style.css">
 <script src="logo-fit.js" defer></script>
+<link rel="stylesheet" href="navy.css?v=15">
+<script src="site.js?v=1" defer></script>
 </head>
-<body>
+<body class="navy">
+
+<div class="sheen" aria-hidden="true"><i></i></div>
 
 <header class="masthead">
   <div class="wrap masthead-inner">
@@ -24,6 +28,9 @@
         <span class="logo-tagline">Buying &amp; Selling Since 1990</span>
       </span>
     </a>
+    <p class="masthead-call">
+      <a class="call-main" href="tel:+12037676705" aria-label="Call Dave at 203-767-6705">203-767-6705</a>
+    </p>
   </div>
 </header>
 
@@ -38,39 +45,40 @@
   </div>
 </nav>
 
-<main class="wrap">
-  <div class="sheet">
+<main class="wrap stack">
 
-    <h2 class="section-title">Products &amp; Services</h2>
+  <section class="sheet">
+    <h1 class="section-title">Products &amp; Services</h1>
 
-    <p>We buy and sell across the following categories. If you are looking for something not listed here, call us &mdash; we handle most related shop equipment.</p>
+    <p class="lead">We buy and sell across the following categories. If you are looking for something not listed here, call us. We handle most related shop equipment.</p>
 
+    <!-- Each tile opens the Inventory. site.js adds the category filter
+         to the link when that category has machines in stock.
+         data-cat must match a category name in inventory.js. -->
     <ul class="capabilities">
-      <li>CNC Machinery</li>
-      <li>Fabricating Machinery</li>
-      <li>Grinders, Cylindrical &amp; Internal</li>
-      <li>Lathes</li>
-      <li>Milling Machinery</li>
-      <li>Presses</li>
+      <li><a href="inventory.html" data-cat="CNC Machinery">CNC Machinery</a></li>
+      <li><a href="inventory.html" data-cat="Fabricating Machinery">Fabricating Machinery</a></li>
+      <li><a href="inventory.html" data-cat="Grinders">Grinders, Cylindrical &amp; Internal</a></li>
+      <li><a href="inventory.html" data-cat="Lathes">Lathes</a></li>
+      <li><a href="inventory.html" data-cat="Milling Machinery">Milling Machinery</a></li>
+      <li><a href="inventory.html" data-cat="Presses">Presses</a></li>
     </ul>
 
     <p class="note">Most machines can be run under power at our warehouse for your inspection.</p>
+  </section>
 
-    <h2 class="section-title spaced">Current Listings</h2>
-
-    <p>Browse the machines in our warehouse right now, or see our listings on eBay and Surplus Record (these two open in a new tab).</p>
-
+  <section class="sheet cta">
+    <div>
+      <h2 class="cta-title">Current Listings</h2>
+      <p>See what is in stock here, or on eBay and Surplus Record (both open in a new tab).</p>
+    </div>
     <div class="buttons">
       <a class="btn" href="inventory.html">Browse Our Inventory</a>
-      <a class="btn" href="https://www.ebay.com/str/guysound" target="_blank" rel="noopener">
-        View Our eBay Listings <span class="ext">&#8599;</span>
-      </a>
-      <a class="btn" href="https://surplusrecord.com/dealer/capital-machine-tools/" target="_blank" rel="noopener">
-        View Us on Surplus Record <span class="ext">&#8599;</span>
-      </a>
+      <a class="btn secondary" href="https://www.ebay.com/str/guysound" target="_blank" rel="noopener">eBay Listings <span class="ext">&#8599;</span></a>
+      <a class="btn secondary" href="https://surplusrecord.com/dealer/capital-machine-tools/" target="_blank" rel="noopener">Surplus Record <span class="ext">&#8599;</span></a>
     </div>
+  </section>
 
-  </div>
 </main>
 
 <footer class="footer">
@@ -85,19 +93,22 @@
         <dd>Dave Henchcliffe</dd>
       </div>
       <div>
-        <dt>Phone</dt>
-        <dd><a href="tel:+12032541643">203-254-1643</a></dd>
-      </div>
-      <div>
         <dt>Cell</dt>
         <dd><a href="tel:+12037676705">203-767-6705</a></dd>
+      </div>
+      <div>
+        <dt>Office</dt>
+        <dd><a href="tel:+12032541643">203-254-1643</a></dd>
       </div>
       <div>
         <dt>Email</dt>
         <dd><a href="mailto:dave@capitalmachinetools.com">dave@capitalmachinetools.com</a></dd>
       </div>
     </dl>
-    <p class="copyright">&copy; 2026 Capital Machine Tools. All rights reserved.</p>
+    <p class="copyright">
+      <span>&copy; 2026 Capital Machine Tools. All rights reserved.</span>
+      <span class="credit">Website by <a href="https://beaumontwest.com" target="_blank" rel="noopener">Beaumont West Solutions</a></span>
+    </p>
   </div>
 </footer>
 
